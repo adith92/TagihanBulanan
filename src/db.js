@@ -1,14 +1,73 @@
 import Database from 'better-sqlite3';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
-const dataDir = path.resolve('data');
+const dataDir = process.env.VERCEL ? path.join(os.tmpdir(), 'tagihan-bulanan') : path.resolve('data');
 const dbPath = path.join(dataDir, 'tagihan.sqlite');
+
+function loadDefaultRows() {
+  const seedPath = new URL('./data/default-billings.json', import.meta.url);
+  if (!fs.existsSync(seedPath)) return [];
+
+  return JSON.parse(fs.readFileSync(seedPath, 'utf8'));
+}
+
+function seedDefaultRows(db) {
+  const existing = db.prepare('SELECT COUNT(*) AS total FROM billings').get();
+  if (existing.total > 0) return;
+
+  const rows = loadDefaultRows();
+  if (!rows.length) return;
+
+  const insert = db.prepare(`
+    INSERT INTO billings (
+      bulan,
+      tahun,
+      kategori,
+      deskripsi,
+      nomor_tagihan,
+      jumlah_tagihan,
+      channel_pembayaran,
+      status_bayar,
+      created_at,
+      updated_at
+    ) VALUES (
+      @bulan,
+      @tahun,
+      @kategori,
+      @deskripsi,
+      @nomor_tagihan,
+      @jumlah_tagihan,
+      @channel_pembayaran,
+      @status_bayar,
+      COALESCE(@createdAt, CURRENT_TIMESTAMP),
+      COALESCE(@updatedAt, CURRENT_TIMESTAMP)
+    )
+  `);
+
+  db.transaction((items) => {
+    for (const row of items) {
+      insert.run({
+        bulan: row.bulan,
+        tahun: row.tahun,
+        kategori: row.kategori,
+        deskripsi: row.deskripsi,
+        nomor_tagihan: row.nomor_tagihan || '',
+        jumlah_tagihan: Number(row.jumlah_tagihan || 0),
+        channel_pembayaran: row.channel_pembayaran,
+        status_bayar: row.status_bayar,
+        createdAt: row.createdAt || null,
+        updatedAt: row.updatedAt || null,
+      });
+    }
+  })(rows);
+}
 
 export function openDb() {
   fs.mkdirSync(dataDir, { recursive: true });
   const db = new Database(dbPath);
-  db.pragma('journal_mode = WAL');
+  db.pragma(`journal_mode = ${process.env.VERCEL ? 'DELETE' : 'WAL'}`);
   db.exec(`
     CREATE TABLE IF NOT EXISTS billings (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,6 +85,7 @@ export function openDb() {
     CREATE INDEX IF NOT EXISTS idx_billings_bulan_tahun ON billings(bulan, tahun);
     CREATE INDEX IF NOT EXISTS idx_billings_search ON billings(kategori, deskripsi, nomor_tagihan, channel_pembayaran, status_bayar);
   `);
+  seedDefaultRows(db);
   return db;
 }
 
