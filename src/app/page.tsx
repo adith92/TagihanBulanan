@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ExcelJS from "exceljs";
 import { jsPDF } from "jspdf";
+import defaultBillings from "@/data/default-billings.json";
 
 type BillingStatus = "Sudah Dibayar" | "Belum Dibayar";
 type BillingChannel = "Tokopedia" | "Shopee" | "Blibli" | "Website" | "Tunai";
@@ -29,7 +30,7 @@ type ImportPreviewRow = {
   safe: boolean;
 };
 
-const STORAGE_KEY = "tagihan-yakin-v1";
+const STORAGE_KEY = "sistem-catatan-tagihan-v2";
 const CHANNELS: BillingChannel[] = ["Tokopedia", "Shopee", "Blibli", "Website", "Tunai"];
 const STATUSES: BillingStatus[] = ["Sudah Dibayar", "Belum Dibayar"];
 const DEFAULT_CATEGORIES = ["PLN", "Internet", "Gedung", "Air", "ATK", "Lainnya"];
@@ -253,21 +254,7 @@ export default function Home() {
         setStorageReady(true);
         return;
       }
-      const seed: BillingRow[] = [
-        {
-          id: uid(),
-          bulan: 1,
-          tahun: 2026,
-          kategori: "PLN",
-          deskripsi: "Listrik Gedung Utama",
-          nomor_tagihan: "1234567890",
-          jumlah_tagihan: 750000,
-          channel_pembayaran: "Tokopedia",
-          status_bayar: "Sudah Dibayar",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ];
+      const seed = defaultBillings as BillingRow[];
       setRows(seed);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
       setStorageReady(true);
@@ -383,7 +370,7 @@ export default function Home() {
     const doc = new jsPDF({ orientation: "landscape" });
     doc.setFontSize(16);
     doc.setTextColor(15, 23, 42);
-    doc.text("SISTEM TAGIHAN OPERASIONAL SEKOLAH YAKIN", 14, 16);
+    doc.text("SISTEM CATATAN TAGIHAN", 14, 16);
     doc.setFontSize(10);
     doc.text(`Filter: ${bulan || "Semua bulan"} / ${tahun || "Semua tahun"} / ${search || "-"}`, 14, 24);
     doc.text(`Total baris: ${filteredRows.length} | Total nominal: ${formatCurrency(total)}`, 14, 30);
@@ -408,10 +395,10 @@ export default function Home() {
           <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
               <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-600">
-                Modern School Ops
+                Dashboard Operasional
               </div>
               <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-6xl">
-                Sistem Tagihan Operasional Sekolah YAKIN
+                Sistem Catatan Tagihan
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
                 Dashboard tagihan yang tenang, rapi, dan data-dense. Fokus ke cepat input, mudah filter, dan siap ekspor tanpa drama.

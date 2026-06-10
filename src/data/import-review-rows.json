@@ -1,0 +1,172 @@
+[
+  {
+    "id": "import-623",
+    "bulan": 3,
+    "tahun": 2022,
+    "kategori": "Tagihan Internet",
+    "deskripsi": "Adithya Palem",
+    "nomor_tagihan": "",
+    "jumlah_tagihan": 489000,
+    "channel_pembayaran": "Tokopedia",
+    "status_bayar": "Sudah Dibayar",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "sourceRow": 623,
+    "errors": [
+      "nomor_tagihan"
+    ]
+  },
+  {
+    "id": "import-1091",
+    "bulan": 9,
+    "tahun": 2023,
+    "kategori": "Telkom / Telepon / Satelit",
+    "deskripsi": "Halo Moriqa",
+    "nomor_tagihan": "",
+    "jumlah_tagihan": 99000,
+    "channel_pembayaran": "Tokopedia",
+    "status_bayar": "Sudah Dibayar",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "sourceRow": 1091,
+    "errors": [
+      "nomor_tagihan"
+    ]
+  },
+  {
+    "id": "import-1115",
+    "bulan": 10,
+    "tahun": 2023,
+    "kategori": "Telkom / Telepon / Satelit",
+    "deskripsi": "Halo Moriqa",
+    "nomor_tagihan": "",
+    "jumlah_tagihan": 99000,
+    "channel_pembayaran": "Tokopedia",
+    "status_bayar": "Belum Dibayar",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "sourceRow": 1115,
+    "errors": [
+      "nomor_tagihan"
+    ]
+  },
+  {
+    "id": "import-1139",
+    "bulan": 11,
+    "tahun": 2023,
+    "kategori": "Telkom / Telepon / Satelit",
+    "deskripsi": "Halo Moriqa",
+    "nomor_tagihan": "",
+    "jumlah_tagihan": 99000,
+    "channel_pembayaran": "Tokopedia",
+    "status_bayar": "Sudah Dibayar",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "sourceRow": 1139,
+    "errors": [
+      "nomor_tagihan"
+    ]
+  },
+  {
+    "id": "import-1164",
+    "bulan": 12,
+    "tahun": 2023,
+    "kategori": "Telkom / Telepon / Satelit",
+    "deskripsi": "Halo Moriqa",
+    "nomor_tagihan": "",
+    "jumlah_tagihan": 99000,
+    "channel_pembayaran": "Tokopedia",
+    "status_bayar": "Belum Dibayar",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "sourceRow": 1164,
+    "errors": [
+      "nomor_tagihan"
+    ]
+  },
+  {
+    "id": "import-1189",
+    "bulan": 1,
+    "tahun": 2024,
+    "kategori": "Telkom / Telepon / Satelit",
+    "deskripsi": "Halo Moriqa",
+    "nomor_tagihan": "",
+    "jumlah_tagihan": 99000,
+    "channel_pembayaran": "Tokopedia",
+    "status_bayar": "Sudah Dibayar",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "sourceRow": 1189,
+    "errors": [
+      "nomor_tagihan"
+    ]
+  },
+  {
+    "id": "import-1213",
+    "bulan": 2,
+    "tahun": 2024,
+    "kategori": "Telkom / Telepon / Satelit",
+    "deskripsi": "Halo Moriqa",
+    "nomor_tagihan": "",
+    "jumlah_tagihan": 99000,
+    "channel_pembayaran": "Tokopedia",
+    "status_bayar": "Belum Dibayar",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "sourceRow": 1213,
+    "errors": [
+      "nomor_tagihan"
+    ]
+  },
+  {
+    "id": "import-1387",
+    "bulan": 9,
+    "tahun": 2024,
+    "kategori": "Telkom / Telepon / Satelit",
+    "deskripsi": "STARLINK",
+    "nomor_tagihan": "",
+    "jumlah_tagihan": 750000,
+    "channel_pembayaran": "Tokopedia",
+    "status_bayar": "Belum Dibayar",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "sourceRow": 1387,
+    "errors": [
+      "nomor_tagihan"
+    ]
+  },
+  {
+    "id": "import-1412",
+    "bulan": 10,
+    "tahun": 2024,
+    "kategori": "Telkom / Telepon / Satelit",
+    "deskripsi": "STARLINK",
+    "nomor_tagihan": "",
+    "jumlah_tagihan": 750000,
+    "channel_pembayaran": "Tokopedia",
+    "status_bayar": "Belum Dibayar",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "sourceRow": 1412,
+    "errors": [
+      "nomor_tagihan"
+    ]
+  },
+  {
+    "id": "import-1437",
+    "bulan": 11,
+    "tahun": 2024,
+    "kategori": "Telkom / Telepon / Satelit",
+    "deskripsi": "STARLINK",
+    "nomor_tagihan": "",
+    "jumlah_tagihan": 750000,
+    "channel_pembayaran": "Tokopedia",
+    "status_bayar": "Belum Dibayar",
+    "createdAt": "2026-06-10T00:00:00.000Z",
+    "updatedAt": "2026-06-10T00:00:00.000Z",
+    "sourceRow": 1437,
+    "errors": [
+      "nomor_tagihan"
+    ]
+  }
+]
