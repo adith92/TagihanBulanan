@@ -534,5 +534,9 @@ app.get('/preview/export', (req, res) => {
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Tagihan YAKIN running on http://localhost:${port}`));
+export default app;
+
+if (!process.env.VERCEL) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => console.log(`Tagihan YAKIN running on http://localhost:${port}`));
+}

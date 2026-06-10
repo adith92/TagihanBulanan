@@ -1041,7 +1041,72 @@ export function renderPage({ title, body, notice }) {
           display: block;
         }
       }
-    </style>
+    
+.month-grid {
+ align-items: end;
+ display: grid;
+ gap: 14px;
+ grid-template-columns: minmax(260px, 0.9fr) minmax(260px, 1.1fr);
+}
+.month-compact {
+ align-items: center;
+ background: linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(20, 83, 45, 0.9));
+ border: 1px solid rgba(148, 163, 184, 0.2);
+ border-radius: 28px;
+ box-shadow: var(--shadow-soft);
+ color: #f8fafc;
+ display: grid;
+ gap: 12px;
+ grid-template-columns: 48px 1fr 48px;
+ padding: 12px;
+}
+.month-current { text-align: center; }
+.month-current span {
+ color: rgba(226, 232, 240, 0.72);
+ display: block;
+ font-size: 0.76rem;
+ font-weight: 800;
+ letter-spacing: 0.14em;
+ text-transform: uppercase;
+}
+.month-current strong {
+ display: block;
+ font-size: clamp(1.35rem, 3vw, 2.15rem);
+ letter-spacing: -0.04em;
+ line-height: 1.05;
+ margin-top: 3px;
+}
+.month-nav {
+ align-items: center;
+ background: rgba(255, 255, 255, 0.1);
+ border: 1px solid rgba(255, 255, 255, 0.14);
+ border-radius: 18px;
+ color: #f8fafc;
+ display: inline-flex;
+ font-size: 1.35rem;
+ font-weight: 900;
+ height: 48px;
+ justify-content: center;
+ text-decoration: none;
+ transition: transform 0.2s ease, background 0.2s ease;
+}
+.month-nav:hover {
+ background: rgba(255, 255, 255, 0.18);
+ transform: translateY(-1px);
+}
+.month-inline-fields {
+ display: grid;
+ gap: 12px;
+ grid-template-columns: minmax(150px, 1fr) minmax(120px, 0.75fr);
+}
+.compact-field { margin: 0; }
+@media (max-width: 720px) {
+ .month-grid,
+ .month-inline-fields { grid-template-columns: 1fr; }
+ .month-compact { grid-template-columns: 44px 1fr 44px; }
+}
+
+</style>
   </head>
   <body>
     <main class="shell">
@@ -1074,11 +1139,35 @@ export function renderPage({ title, body, notice }) {
 
 export function renderIndex({ rows, summary, query, categories, counts, notice }) {
   const currentYear = new Date().getFullYear();
-  const monthButtons = Array.from({ length: 12 }, (_, index) => {
+  const selectedMonth = Number(query.bulan || new Date().getMonth() + 1);
+  const selectedYear = Number(query.tahun || currentYear);
+  const prevMonth = selectedMonth === 1 ? 12 : selectedMonth - 1;
+  const prevYear = selectedMonth === 1 ? selectedYear - 1 : selectedYear;
+  const nextMonth = selectedMonth === 12 ? 1 : selectedMonth + 1;
+  const nextYear = selectedMonth === 12 ? selectedYear + 1 : selectedYear;
+  const monthSelect = Array.from({ length: 12 }, (_, index) => {
     const month = index + 1;
-    const isActive = Number(query.bulan || 0) === month;
-    return `<button class="month-chip ${isActive ? 'active' : ''}" type="submit" name="bulan" value="${month}" aria-pressed="${isActive ? 'true' : 'false'}"><span>${String(month).padStart(2, '0')}</span><br />${escapeHtml(monthName(month))}</button>`;
+    return `<option value="${month}"${month === selectedMonth ? ' selected' : ''}>${escapeHtml(monthName(month))}</option>`;
   }).join('');
+  const monthControls = `
+    <div class="month-compact" aria-label="Navigasi bulan kerja">
+      <a class="month-nav" href="/?${queryParams(query, { bulan: prevMonth, tahun: prevYear })}" aria-label="Bulan sebelumnya">&larr;</a>
+      <div class="month-current">
+        <span>Bulan aktif</span>
+        <strong>${escapeHtml(monthName(selectedMonth))} ${selectedYear}</strong>
+      </div>
+      <a class="month-nav" href="/?${queryParams(query, { bulan: nextMonth, tahun: nextYear })}" aria-label="Bulan berikutnya">&rarr;</a>
+    </div>
+    <div class="month-inline-fields">
+      <label class="field compact-field">
+        <span>Bulan</span>
+        <select name="bulan">${monthSelect}</select>
+      </label>
+      <label class="field compact-field">
+        <span>Tahun</span>
+        <select name="tahun">${yearOptions(currentYear, selectedYear)}</select>
+      </label>
+    </div>`;
 
   const groupedRows = groupRowsByCategory(rows, categories);
   const totalRows = rows.length;
@@ -1166,7 +1255,7 @@ export function renderIndex({ rows, summary, query, categories, counts, notice }
               <span class="field-label">Bulan</span>
               <div class="month-grid">
                 <button class="month-chip ${!query.bulan ? 'active' : ''}" type="submit" name="bulan" value="" aria-pressed="${!query.bulan ? 'true' : 'false'}">Semua<br /><span>bulan</span></button>
-                ${monthButtons}
+                ${monthControls}
               </div>
             </div>
           </div>
