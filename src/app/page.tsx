@@ -135,11 +135,14 @@ function mapLegacyRow(raw: Record<string, string>, index: number): ImportPreview
   return { rowNumber: index + 2, data, errors, reviewReasons, safe: errors.length === 0 && reviewReasons.length === 0 };
 }
 
-function parseImportFile(text: string, fileName: string): ImportPreviewRow[] {
+function parseImportFile(content: string | ArrayBuffer, fileName: string): ImportPreviewRow[] {
   const ext = fileName.split(".").pop()?.toLowerCase();
-  if (ext === "csv") return parseCsv(text).map((row, index) => mapLegacyRow(row, index));
+  if (ext === "csv") {
+    const text = typeof content === "string" ? content : new TextDecoder().decode(content);
+    return parseCsv(text).map((row, index) => mapLegacyRow(row, index));
+  }
 
-  const workbook = XLSX.read(text, { type: "string" });
+  const workbook = XLSX.read(content, { type: typeof content === "string" ? "string" : "array" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
   return rows.map((row, index) => {
@@ -203,35 +206,42 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [preview, setPreview] = useState<ImportPreviewRow[]>([]);
   const [importing, setImporting] = useState(false);
+  const [storageReady, setStorageReady] = useState(false);
 
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      setRows(JSON.parse(raw));
-      return;
-    }
-    const seed: BillingRow[] = [
-      {
-        id: uid(),
-        bulan: 1,
-        tahun: 2026,
-        kategori: "PLN",
-        deskripsi: "Listrik Gedung Utama",
-        nomor_tagihan: "1234567890",
-        jumlah_tagihan: 750000,
-        channel_pembayaran: "Tokopedia",
-        status_bayar: "Sudah Dibayar",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-    setRows(seed);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+    const timer = window.setTimeout(() => {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        setRows(JSON.parse(raw));
+        setStorageReady(true);
+        return;
+      }
+      const seed: BillingRow[] = [
+        {
+          id: uid(),
+          bulan: 1,
+          tahun: 2026,
+          kategori: "PLN",
+          deskripsi: "Listrik Gedung Utama",
+          nomor_tagihan: "1234567890",
+          jumlah_tagihan: 750000,
+          channel_pembayaran: "Tokopedia",
+          status_bayar: "Sudah Dibayar",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+      setRows(seed);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+      setStorageReady(true);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    if (rows.length) localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
-  }, [rows]);
+    if (storageReady) localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+  }, [rows, storageReady]);
 
   const filteredRows = useMemo(() => {
     return rows.filter((row) => {
@@ -298,8 +308,13 @@ export default function Home() {
     setImporting(true);
     const reader = new FileReader();
     reader.onload = () => {
-      const text = String(reader.result ?? "");
-      const parsed = parseImportFile(text, file.name);
+      const content = reader.result;
+      if (!content) {
+        setNotice("File tidak bisa dibaca.");
+        setImporting(false);
+        return;
+      }
+      const parsed = parseImportFile(content, file.name);
       setPreview(parsed);
       const safeRows = parsed
         .filter((item) => item.safe && item.data)
@@ -324,7 +339,7 @@ export default function Home() {
       }
       setImporting(false);
     };
-    reader.readAsText(file);
+    reader.readAsArrayBuffer(file);
   }
 
   function exportPdf() {
@@ -445,7 +460,7 @@ export default function Home() {
             </Panel>
 
             <Panel title="Daftar Tagihan" description="Tabel operasional yang fokus ke data, bukan ornamen.">
-              <div className="overflow-hidden rounded-[1.5rem] border border-slate-200">
+              <div className="hidden overflow-hidden rounded-[1.5rem] border border-slate-200 md:block">
                 <div className="max-h-[720px] overflow-auto">
                   <table className="min-w-full border-separate border-spacing-0">
                     <thead className="sticky top-0 z-10 bg-slate-950 text-left text-[11px] uppercase tracking-[0.22em] text-slate-300">
