@@ -30,11 +30,10 @@ type ImportPreviewRow = {
 };
 
 const STORAGE_KEY = "tagihan-yakin-v1";
-const CATEGORIES = ["PLN", "Internet", "Gedung", "Air", "ATK", "Lainnya"];
 const CHANNELS: BillingChannel[] = ["Tokopedia", "Shopee", "Blibli", "Website", "Tunai"];
 const STATUSES: BillingStatus[] = ["Sudah Dibayar", "Belum Dibayar"];
-
-const monthNames = [
+const DEFAULT_CATEGORIES = ["PLN", "Internet", "Gedung", "Air", "ATK", "Lainnya"];
+const MONTHS = [
   "Januari",
   "Februari",
   "Maret",
@@ -61,6 +60,11 @@ function normalizeHeader(value: string) {
   return value.trim().toLowerCase().replace(/[\s\-./]+/g, "_");
 }
 
+function toNumber(value: unknown) {
+  const raw = String(value ?? "").replace(/[^\d-]/g, "");
+  return raw ? Number(raw) : NaN;
+}
+
 function parseCsv(text: string) {
   const lines = text.trim().split(/\r?\n/).filter(Boolean);
   if (!lines.length) return [];
@@ -75,11 +79,6 @@ function parseCsv(text: string) {
   });
 }
 
-function toNumber(value: unknown) {
-  const raw = String(value ?? "").replace(/[^\d-]/g, "");
-  return raw ? Number(raw) : NaN;
-}
-
 function mapLegacyRow(raw: Record<string, string>, index: number): ImportPreviewRow {
   const aliases: Record<string, string[]> = {
     bulan: ["bulan", "bln", "month"],
@@ -92,17 +91,17 @@ function mapLegacyRow(raw: Record<string, string>, index: number): ImportPreview
     status_bayar: ["status_bayar", "status", "paid_status"],
   };
 
-  const read = (field: keyof typeof aliases) => {
-    const keys = aliases[field];
-    const hit = keys.find((key) => raw[key] !== undefined);
-    return hit ? raw[hit] : "";
-  };
+  const read = (key: keyof typeof aliases) => aliases[key].find((alias) => raw[alias] !== undefined) ?? "";
+  const get = (key: keyof typeof aliases) => raw[read(key)] ?? "";
 
-  const bulan = toNumber(read("bulan"));
-  const tahun = toNumber(read("tahun"));
-  const jumlah = toNumber(read("jumlah_tagihan"));
-  const channelRaw = read("channel_pembayaran");
-  const statusRaw = read("status_bayar");
+  const bulan = toNumber(get("bulan"));
+  const tahun = toNumber(get("tahun"));
+  const jumlah = toNumber(get("jumlah_tagihan"));
+  const kategori = get("kategori").trim();
+  const deskripsi = get("deskripsi").trim();
+  const nomor_tagihan = get("nomor_tagihan").trim();
+  const channelRaw = get("channel_pembayaran").trim();
+  const statusRaw = get("status_bayar").trim();
   const channel = CHANNELS.find((item) => item.toLowerCase() === channelRaw.toLowerCase());
   const status =
     statusRaw.toLowerCase() === "sudah dibayar" || ["lunas", "paid", "yes", "ya", "1"].includes(statusRaw.toLowerCase())
@@ -114,9 +113,9 @@ function mapLegacyRow(raw: Record<string, string>, index: number): ImportPreview
   const data: Partial<BillingRow> = {
     bulan,
     tahun,
-    kategori: read("kategori"),
-    deskripsi: read("deskripsi"),
-    nomor_tagihan: read("nomor_tagihan"),
+    kategori,
+    deskripsi,
+    nomor_tagihan,
     jumlah_tagihan: jumlah,
     channel_pembayaran: channel,
     status_bayar: status,
@@ -124,30 +123,21 @@ function mapLegacyRow(raw: Record<string, string>, index: number): ImportPreview
 
   const errors: string[] = [];
   const reviewReasons: string[] = [];
-
   if (!Number.isInteger(bulan) || bulan < 1 || bulan > 12) errors.push("bulan tidak valid");
   if (!Number.isInteger(tahun) || tahun < 1900 || tahun > 2100) errors.push("tahun tidak valid");
-  if (!data.kategori) errors.push("kategori kosong");
-  if (!data.deskripsi) errors.push("deskripsi kosong");
-  if (!data.nomor_tagihan) errors.push("nomor tagihan kosong");
+  if (!kategori) errors.push("kategori kosong");
+  if (!deskripsi) errors.push("deskripsi kosong");
+  if (!nomor_tagihan) errors.push("nomor tagihan kosong");
   if (!Number.isInteger(jumlah) || jumlah < 0) errors.push("jumlah tidak valid");
   if (!channel) reviewReasons.push("channel_pembayaran ambigu");
   if (!status) reviewReasons.push("status_bayar ambigu");
 
-  return {
-    rowNumber: index + 2,
-    data,
-    errors,
-    reviewReasons,
-    safe: errors.length === 0 && reviewReasons.length === 0,
-  };
+  return { rowNumber: index + 2, data, errors, reviewReasons, safe: errors.length === 0 && reviewReasons.length === 0 };
 }
 
 function parseImportFile(text: string, fileName: string): ImportPreviewRow[] {
   const ext = fileName.split(".").pop()?.toLowerCase();
-  if (ext === "csv") {
-    return parseCsv(text).map((row, index) => mapLegacyRow(row, index));
-  }
+  if (ext === "csv") return parseCsv(text).map((row, index) => mapLegacyRow(row, index));
 
   const workbook = XLSX.read(text, { type: "string" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -175,10 +165,10 @@ function exportXlsx(rows: BillingRow[]) {
     channel_pembayaran: row.channel_pembayaran,
     status_bayar: row.status_bayar,
   }));
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Tagihan");
-  return XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Tagihan");
+  return XLSX.write(workbook, { type: "array", bookType: "xlsx" });
 }
 
 function download(name: string, blob: Blob) {
@@ -190,12 +180,8 @@ function download(name: string, blob: Blob) {
   URL.revokeObjectURL(url);
 }
 
-export default function Home() {
-  const [rows, setRows] = useState<BillingRow[]>([]);
-  const [bulan, setBulan] = useState<string>("");
-  const [tahun, setTahun] = useState<string>("");
-  const [search, setSearch] = useState("");
-  const [form, setForm] = useState<Partial<BillingRow>>({
+function initialForm(): Partial<BillingRow> {
+  return {
     bulan: new Date().getMonth() + 1,
     tahun: new Date().getFullYear(),
     kategori: "PLN",
@@ -204,10 +190,19 @@ export default function Home() {
     jumlah_tagihan: 0,
     channel_pembayaran: "Website",
     status_bayar: "Belum Dibayar",
-  });
+  };
+}
+
+export default function Home() {
+  const [rows, setRows] = useState<BillingRow[]>([]);
+  const [bulan, setBulan] = useState("");
+  const [tahun, setTahun] = useState("");
+  const [search, setSearch] = useState("");
+  const [form, setForm] = useState<Partial<BillingRow>>(initialForm());
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string>("");
+  const [notice, setNotice] = useState("");
   const [preview, setPreview] = useState<ImportPreviewRow[]>([]);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -244,10 +239,7 @@ export default function Home() {
       const matchTahun = tahun ? String(row.tahun) === tahun : true;
       const q = search.trim().toLowerCase();
       const matchSearch = q
-        ? [row.kategori, row.deskripsi, row.nomor_tagihan, row.channel_pembayaran, row.status_bayar]
-            .join(" ")
-            .toLowerCase()
-            .includes(q)
+        ? [row.kategori, row.deskripsi, row.nomor_tagihan, row.channel_pembayaran, row.status_bayar].join(" ").toLowerCase().includes(q)
         : true;
       return matchBulan && matchTahun && matchSearch;
     });
@@ -264,16 +256,7 @@ export default function Home() {
 
   function resetForm() {
     setEditingId(null);
-    setForm({
-      bulan: new Date().getMonth() + 1,
-      tahun: new Date().getFullYear(),
-      kategori: "PLN",
-      deskripsi: "",
-      nomor_tagihan: "",
-      jumlah_tagihan: 0,
-      channel_pembayaran: "Website",
-      status_bayar: "Belum Dibayar",
-    });
+    setForm(initialForm());
   }
 
   function submitForm() {
@@ -295,9 +278,7 @@ export default function Home() {
     if (!payload.tahun || payload.tahun < 1900) return setNotice("Tahun tidak valid.");
     if (!payload.kategori || !payload.deskripsi || !payload.nomor_tagihan) return setNotice("Field utama wajib diisi.");
 
-    setRows((current) =>
-      editingId ? current.map((item) => (item.id === editingId ? payload : item)) : [payload, ...current],
-    );
+    setRows((current) => (editingId ? current.map((item) => (item.id === editingId ? payload : item)) : [payload, ...current]));
     setNotice(editingId ? "Tagihan diperbarui." : "Tagihan ditambahkan.");
     resetForm();
   }
@@ -305,6 +286,7 @@ export default function Home() {
   function editRow(row: BillingRow) {
     setEditingId(row.id);
     setForm(row);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function deleteRow(id: string) {
@@ -313,42 +295,47 @@ export default function Home() {
   }
 
   function handleImport(file: File) {
+    setImporting(true);
     const reader = new FileReader();
     reader.onload = () => {
       const text = String(reader.result ?? "");
       const parsed = parseImportFile(text, file.name);
       setPreview(parsed);
-      const safeRows = parsed.filter((item) => item.safe && item.data).map((item) => ({
-        id: uid(),
-        bulan: item.data!.bulan as number,
-        tahun: item.data!.tahun as number,
-        kategori: item.data!.kategori as string,
-        deskripsi: item.data!.deskripsi as string,
-        nomor_tagihan: item.data!.nomor_tagihan as string,
-        jumlah_tagihan: item.data!.jumlah_tagihan as number,
-        channel_pembayaran: item.data!.channel_pembayaran as BillingChannel,
-        status_bayar: item.data!.status_bayar as BillingStatus,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }));
+      const safeRows = parsed
+        .filter((item) => item.safe && item.data)
+        .map((item) => ({
+          id: uid(),
+          bulan: item.data!.bulan as number,
+          tahun: item.data!.tahun as number,
+          kategori: item.data!.kategori as string,
+          deskripsi: item.data!.deskripsi as string,
+          nomor_tagihan: item.data!.nomor_tagihan as string,
+          jumlah_tagihan: item.data!.jumlah_tagihan as number,
+          channel_pembayaran: item.data!.channel_pembayaran as BillingChannel,
+          status_bayar: item.data!.status_bayar as BillingStatus,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }));
       if (safeRows.length) {
         setRows((current) => [...safeRows, ...current]);
         setNotice(`Import selesai. ${safeRows.length} baris aman ditambahkan. Baris ambigu tetap di review.`);
       } else {
         setNotice("Tidak ada baris aman untuk diimpor.");
       }
+      setImporting(false);
     };
     reader.readAsText(file);
   }
 
-  async function exportPdf() {
+  function exportPdf() {
     const doc = new jsPDF({ orientation: "landscape" });
     doc.setFontSize(16);
+    doc.setTextColor(15, 23, 42);
     doc.text("SISTEM TAGIHAN OPERASIONAL SEKOLAH YAKIN", 14, 16);
     doc.setFontSize(10);
     doc.text(`Filter: ${bulan || "Semua bulan"} / ${tahun || "Semua tahun"} / ${search || "-"}`, 14, 24);
     doc.text(`Total baris: ${filteredRows.length} | Total nominal: ${formatCurrency(total)}`, 14, 30);
-    let y = 40;
+    let y = 42;
     filteredRows.forEach((row) => {
       const line = `${row.bulan}/${row.tahun} | ${row.kategori} | ${row.deskripsi} | ${row.nomor_tagihan} | ${formatCurrency(row.jumlah_tagihan)} | ${row.channel_pembayaran} | ${row.status_bayar}`;
       const lines = doc.splitTextToSize(line, 260);
@@ -357,195 +344,341 @@ export default function Home() {
         y = 20;
       }
       doc.text(lines, 14, y);
-      y += lines.length * 5 + 2;
+      y += lines.length * 5 + 4;
     });
     doc.save("tagihan-yakin.pdf");
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#1d4ed8_0,_#0f172a_42%,_#030712_100%)] text-slate-100">
-      <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
-        <section className="rounded-[2rem] border border-white/10 bg-white/8 p-8 shadow-2xl shadow-black/30 backdrop-blur">
-          <p className="text-sm uppercase tracking-[0.3em] text-sky-200">Sistem Tagihan Operasional Sekolah YAKIN</p>
-          <h1 className="mt-3 text-4xl font-black leading-tight md:text-6xl">CRUD, filter, summary, import/export, dan PDF siap cetak.</h1>
-          <p className="mt-4 max-w-3xl text-base text-slate-200 md:text-lg">
-            Semua data disimpan aman di browser via `localStorage`, cocok untuk deploy cepat ke Vercel tanpa backend tambahan.
-          </p>
-        </section>
-
-        {notice ? <div className="mt-6 rounded-2xl border border-amber-300/40 bg-amber-400/15 p-4 text-amber-100">{notice}</div> : null}
-
-        <section className="mt-6 grid gap-4 md:grid-cols-4">
-          <Card label="Data tampil" value={String(filteredRows.length)} />
-          <Card label="Total nominal" value={formatCurrency(total)} />
-          <Card label="Sudah dibayar" value={String(done)} />
-          <Card label="Belum dibayar" value={String(pending)} />
-        </section>
-
-        <section className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-xl">
-            <div className="flex flex-wrap gap-3">
-              <select value={bulan} onChange={(e) => setBulan(e.target.value)} className="input">
-                <option value="">Semua bulan</option>
-                {monthNames.map((name, index) => (
-                  <option key={name} value={index + 1}>{`${index + 1} - ${name}`}</option>
-                ))}
-              </select>
-              <select value={tahun} onChange={(e) => setTahun(e.target.value)} className="input">
-                <option value="">Semua tahun</option>
-                {[new Date().getFullYear(), new Date().getFullYear() - 1, new Date().getFullYear() + 1].map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search tagihan..." className="input flex-1 min-w-56" />
-              <button className="btn" onClick={() => { setBulan(""); setTahun(""); setSearch(""); }}>Reset</button>
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#e2e8f0_0,_#f8fafc_28%,_#dbeafe_100%)] text-slate-900">
+      <div className="mx-auto max-w-[1500px] px-4 py-6 md:px-8">
+        <header className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur">
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+            <div className="max-w-3xl">
+              <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-slate-600">
+                Modern School Ops
+              </div>
+              <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-6xl">
+                Sistem Tagihan Operasional Sekolah YAKIN
+              </h1>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">
+                Dashboard tagihan yang tenang, rapi, dan data-dense. Fokus ke cepat input, mudah filter, dan siap ekspor tanpa drama.
+              </p>
             </div>
-
-            <div className="mt-4 flex flex-wrap gap-3">
-              <button className="btn btn-primary" onClick={submitForm}>{editingId ? "Simpan Perubahan" : "Tambah Tagihan"}</button>
-              <button className="btn" onClick={resetForm}>Clear Form</button>
-              <label className="btn cursor-pointer">
-                Import Excel/CSV
-                <input type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={(e) => e.target.files?.[0] && handleImport(e.target.files[0])} />
-              </label>
-              <button className="btn" onClick={() => {
-                const blob = new Blob([exportCsv(filteredRows)], { type: "text/csv;charset=utf-8" });
-                download("tagihan-yakin.csv", blob);
-              }}>Export CSV</button>
-              <button className="btn" onClick={() => {
-                const data = exportXlsx(filteredRows);
-                download("tagihan-yakin.xlsx", new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
-              }}>Export Excel</button>
-              <button className="btn" onClick={exportPdf}>Export PDF</button>
-            </div>
-
-            <div className="mt-6 overflow-auto rounded-2xl border border-white/10">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-white/5 text-xs uppercase tracking-[0.2em] text-slate-300">
-                  <tr>
-                    <th className="px-4 py-3">Bulan/Tahun</th>
-                    <th className="px-4 py-3">Kategori</th>
-                    <th className="px-4 py-3">Deskripsi</th>
-                    <th className="px-4 py-3">Nomor</th>
-                    <th className="px-4 py-3">Jumlah</th>
-                    <th className="px-4 py-3">Channel</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRows.map((row) => (
-                    <tr key={row.id} className="border-t border-white/10">
-                      <td className="px-4 py-3">{`${row.bulan}/${row.tahun}`}</td>
-                      <td className="px-4 py-3">{row.kategori}</td>
-                      <td className="px-4 py-3">{row.deskripsi}</td>
-                      <td className="px-4 py-3">{row.nomor_tagihan}</td>
-                      <td className="px-4 py-3">{formatCurrency(row.jumlah_tagihan)}</td>
-                      <td className="px-4 py-3">{row.channel_pembayaran}</td>
-                      <td className="px-4 py-3">{row.status_bayar}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2">
-                          <button className="btn" onClick={() => editRow(row)}>Edit</button>
-                          <button className="btn" onClick={() => deleteRow(row.id)}>Hapus</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="grid w-full gap-3 sm:grid-cols-2 xl:w-[440px]">
+              <QuickStat label="Data tampil" value={String(filteredRows.length)} tone="indigo" />
+              <QuickStat label="Total nominal" value={formatCurrency(total)} tone="emerald" />
+              <QuickStat label="Sudah dibayar" value={String(done)} tone="sky" />
+              <QuickStat label="Belum dibayar" value={String(pending)} tone="amber" />
             </div>
           </div>
+        </header>
 
+        {notice ? (
+          <div className="mt-5 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sky-900 shadow-sm" aria-live="polite">
+            {notice}
+          </div>
+        ) : null}
+
+        <section className="mt-6 grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
           <div className="space-y-6">
-            <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-xl">
-              <h2 className="text-xl font-bold">Form Tagihan</h2>
-              <div className="mt-4 grid gap-3">
-                <div className="grid gap-3 md:grid-cols-2">
-                  <Input label="Bulan" type="number" value={String(form.bulan ?? "")} onChange={(v) => setForm({ ...form, bulan: Number(v) })} />
-                  <Input label="Tahun" type="number" value={String(form.tahun ?? "")} onChange={(v) => setForm({ ...form, tahun: Number(v) })} />
-                </div>
-                <Input label="Kategori" value={String(form.kategori ?? "")} onChange={(v) => setForm({ ...form, kategori: v })} />
-                <Input label="Deskripsi" value={String(form.deskripsi ?? "")} onChange={(v) => setForm({ ...form, deskripsi: v })} />
-                <Input label="Nomor Tagihan" value={String(form.nomor_tagihan ?? "")} onChange={(v) => setForm({ ...form, nomor_tagihan: v })} />
-                <Input label="Jumlah Tagihan" type="number" value={String(form.jumlah_tagihan ?? "")} onChange={(v) => setForm({ ...form, jumlah_tagihan: Number(v) })} />
-                <div className="grid gap-3 md:grid-cols-2">
-                  <Select label="Channel Pembayaran" value={String(form.channel_pembayaran ?? "")} onChange={(v) => setForm({ ...form, channel_pembayaran: v as BillingChannel })} options={CHANNELS} />
-                  <Select label="Status Bayar" value={String(form.status_bayar ?? "")} onChange={(v) => setForm({ ...form, status_bayar: v as BillingStatus })} options={STATUSES} />
+            <Panel title="Filter & Aksi" description="Saring data, impor file, dan ekspor hasil yang sedang tampil.">
+              <div className="grid gap-3 lg:grid-cols-4">
+                <FieldSelect label="Bulan" value={bulan} onChange={setBulan}>
+                  <option value="">Semua bulan</option>
+                  {MONTHS.map((name, index) => (
+                    <option key={name} value={index + 1}>{`${index + 1} - ${name}`}</option>
+                  ))}
+                </FieldSelect>
+                <FieldSelect label="Tahun" value={tahun} onChange={setTahun}>
+                  <option value="">Semua tahun</option>
+                  {[new Date().getFullYear(), new Date().getFullYear() - 1, new Date().getFullYear() + 1].map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </FieldSelect>
+                <FieldInput label="Search" value={search} onChange={setSearch} placeholder="Cari kategori, deskripsi, nomor..." />
+                <div className="flex items-end">
+                  <button className="btn-secondary h-12 w-full" onClick={() => { setBulan(""); setTahun(""); setSearch(""); }}>
+                    Reset filter
+                  </button>
                 </div>
               </div>
-            </section>
 
-            <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-xl">
-              <h2 className="text-xl font-bold">Total per kategori</h2>
-              <div className="mt-4 space-y-3">
-                {categories.length ? categories.map((item) => (
-                  <div key={item.kategori} className="flex items-center justify-between rounded-2xl border border-white/10 px-4 py-3">
-                    <strong>{item.kategori}</strong>
-                    <span>{formatCurrency(item.total)}</span>
-                  </div>
-                )) : <p className="text-slate-300">Belum ada data.</p>}
+              <div className="mt-4 flex flex-wrap gap-3">
+                <button className="btn-primary" onClick={submitForm}>
+                  {editingId ? "Simpan perubahan" : "Tambah tagihan"}
+                </button>
+                <button className="btn-secondary" onClick={resetForm}>
+                  Clear form
+                </button>
+                <label className="btn-secondary cursor-pointer">
+                  {importing ? "Memproses..." : "Import Excel/CSV"}
+                  <input
+                    type="file"
+                    accept=".csv,.xlsx,.xls"
+                    className="hidden"
+                    onChange={(e) => e.target.files?.[0] && handleImport(e.target.files[0])}
+                  />
+                </label>
+                <button className="btn-secondary" onClick={() => download("tagihan-yakin.csv", new Blob([exportCsv(filteredRows)], { type: "text/csv;charset=utf-8" }))}>
+                  Export CSV
+                </button>
+                <button
+                  className="btn-secondary"
+                  onClick={() =>
+                    download(
+                      "tagihan-yakin.xlsx",
+                      new Blob([exportXlsx(filteredRows)], {
+                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                      }),
+                    )
+                  }
+                >
+                  Export Excel
+                </button>
+                <button className="btn-secondary" onClick={exportPdf}>
+                  Export PDF
+                </button>
               </div>
-            </section>
+            </Panel>
 
-            <section className="rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-xl">
-              <h2 className="text-xl font-bold">Preview Import</h2>
-              <p className="mt-2 text-sm text-slate-300">Baris ambigu tidak otomatis dimasukkan. Mereka harus direview dulu.</p>
-              <div className="mt-4 space-y-3">
-                {preview.slice(0, 5).map((row) => (
-                  <div key={row.rowNumber} className="rounded-2xl border border-white/10 p-3 text-sm">
-                    <div className="font-semibold">Baris {row.rowNumber}</div>
-                    <div className="text-slate-300">{row.safe ? "Aman untuk import" : row.reviewReasons.concat(row.errors).join(", ")}</div>
+            <Panel title="Daftar Tagihan" description="Tabel operasional yang fokus ke data, bukan ornamen.">
+              <div className="overflow-hidden rounded-[1.5rem] border border-slate-200">
+                <div className="max-h-[720px] overflow-auto">
+                  <table className="min-w-full border-separate border-spacing-0">
+                    <thead className="sticky top-0 z-10 bg-slate-950 text-left text-[11px] uppercase tracking-[0.22em] text-slate-300">
+                      <tr>
+                        <Th>Bulan/Tahun</Th>
+                        <Th>Kategori</Th>
+                        <Th>Deskripsi</Th>
+                        <Th>Nomor</Th>
+                        <Th align="right">Jumlah</Th>
+                        <Th>Channel</Th>
+                        <Th>Status</Th>
+                        <Th>Aksi</Th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredRows.length ? (
+                        filteredRows.map((row, index) => (
+                          <tr key={row.id} className={index % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                            <Td className="font-semibold text-slate-900">{`${row.bulan}/${row.tahun}`}</Td>
+                            <Td>
+                              <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                                {row.kategori}
+                              </span>
+                            </Td>
+                            <Td className="max-w-[260px]">
+                              <div className="truncate text-slate-700">{row.deskripsi}</div>
+                            </Td>
+                            <Td className="font-mono text-sm text-slate-700">{row.nomor_tagihan}</Td>
+                            <Td className="text-right font-semibold tabular-nums text-slate-900">{formatCurrency(row.jumlah_tagihan)}</Td>
+                            <Td className="text-slate-700">{row.channel_pembayaran}</Td>
+                            <Td>
+                              <StatusPill value={row.status_bayar} />
+                            </Td>
+                            <Td>
+                              <div className="flex flex-wrap gap-2">
+                                <button className="btn-mini" onClick={() => editRow(row)}>
+                                  Edit
+                                </button>
+                                <button className="btn-mini" onClick={() => deleteRow(row.id)}>
+                                  Hapus
+                                </button>
+                              </div>
+                            </Td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td className="px-4 py-10 text-center text-sm text-slate-500" colSpan={8}>
+                            Belum ada data tagihan yang cocok dengan filter aktif.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 md:hidden">
+                {filteredRows.map((row) => (
+                  <div key={row.id} className="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-slate-500">{`${row.bulan}/${row.tahun}`}</div>
+                        <div className="mt-1 text-lg font-bold text-slate-950">{row.kategori}</div>
+                      </div>
+                      <StatusPill value={row.status_bayar} />
+                    </div>
+                    <div className="mt-3 space-y-2 text-sm text-slate-700">
+                      <div>{row.deskripsi}</div>
+                      <div className="font-mono">{row.nomor_tagihan}</div>
+                      <div>{row.channel_pembayaran}</div>
+                      <div className="font-semibold tabular-nums text-slate-900">{formatCurrency(row.jumlah_tagihan)}</div>
+                    </div>
+                    <div className="mt-4 flex gap-2">
+                      <button className="btn-mini" onClick={() => editRow(row)}>
+                        Edit
+                      </button>
+                      <button className="btn-mini" onClick={() => deleteRow(row.id)}>
+                        Hapus
+                      </button>
+                    </div>
                   </div>
                 ))}
-                {!preview.length ? <p className="text-slate-300">Belum ada file di-preview.</p> : null}
               </div>
-            </section>
+            </Panel>
           </div>
+
+          <aside className="space-y-6">
+            <Panel title="Form Tagihan" description="Satu tempat untuk tambah dan edit data.">
+              <div className="grid gap-3">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <FieldInput label="Bulan" type="number" value={String(form.bulan ?? "")} onChange={(v) => setForm({ ...form, bulan: Number(v) })} />
+                  <FieldInput label="Tahun" type="number" value={String(form.tahun ?? "")} onChange={(v) => setForm({ ...form, tahun: Number(v) })} />
+                </div>
+                <FieldInput label="Kategori" value={String(form.kategori ?? "")} onChange={(v) => setForm({ ...form, kategori: v })} />
+                <FieldInput label="Deskripsi" value={String(form.deskripsi ?? "")} onChange={(v) => setForm({ ...form, deskripsi: v })} />
+                <FieldInput label="Nomor Tagihan" value={String(form.nomor_tagihan ?? "")} onChange={(v) => setForm({ ...form, nomor_tagihan: v })} />
+                <FieldInput label="Jumlah Tagihan" type="number" value={String(form.jumlah_tagihan ?? "")} onChange={(v) => setForm({ ...form, jumlah_tagihan: Number(v) })} />
+                <div className="grid gap-3 md:grid-cols-2">
+                  <FieldSelect label="Channel Pembayaran" value={String(form.channel_pembayaran ?? "")} onChange={(v) => setForm({ ...form, channel_pembayaran: v as BillingChannel })}>
+                    {CHANNELS.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </FieldSelect>
+                  <FieldSelect label="Status Bayar" value={String(form.status_bayar ?? "")} onChange={(v) => setForm({ ...form, status_bayar: v as BillingStatus })}>
+                    {STATUSES.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </FieldSelect>
+                </div>
+                <p className="text-sm leading-6 text-slate-500">
+                  Kategori yang umum dipakai: {DEFAULT_CATEGORIES.join(", ")}.
+                </p>
+              </div>
+            </Panel>
+
+            <Panel title="Total per kategori" description="Ringkas beban tagihan berdasarkan kategori aktif.">
+              <div className="space-y-3">
+                {categories.length ? (
+                  categories.map((item) => (
+                    <div key={item.kategori} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                      <div className="font-semibold text-slate-800">{item.kategori}</div>
+                      <div className="font-semibold tabular-nums text-slate-950">{formatCurrency(item.total)}</div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500">Belum ada data untuk ditampilkan.</p>
+                )}
+              </div>
+            </Panel>
+
+            <Panel title="Preview Import" description="Baris aman masuk otomatis, baris ambigu tetap review manual.">
+              <div className="space-y-3">
+                {preview.length ? (
+                  preview.slice(0, 6).map((row) => (
+                    <div key={row.rowNumber} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-sm font-semibold text-slate-500">Baris {row.rowNumber}</div>
+                        <span className={row.safe ? "pill pill-ok" : "pill pill-warn"}>{row.safe ? "Safe" : "Review"}</span>
+                      </div>
+                      <div className="mt-2 text-sm text-slate-700">
+                        {row.safe ? "Siap diimpor." : [...row.reviewReasons, ...row.errors].join(", ")}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500">Belum ada file yang dipreview.</p>
+                )}
+              </div>
+            </Panel>
+          </aside>
         </section>
       </div>
     </main>
   );
 }
 
-function Card({ label, value }: { label: string; value: string }) {
+function QuickStat({ label, value, tone }: { label: string; value: string; tone: "indigo" | "emerald" | "sky" | "amber" }) {
   return (
-    <div className="rounded-[1.75rem] border border-white/10 bg-white/10 p-5 shadow-xl backdrop-blur">
-      <div className="text-xs uppercase tracking-[0.3em] text-sky-200">{label}</div>
-      <div className="mt-2 text-3xl font-black text-white">{value}</div>
+    <div className={`stat-card stat-${tone}`}>
+      <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{label}</div>
+      <div className="mt-2 text-2xl font-black tracking-tight text-slate-950">{value}</div>
     </div>
   );
 }
 
-function Input({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
+function Panel({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
-    <label className="grid gap-2 text-sm text-slate-200">
-      <span>{label}</span>
-      <input className="input" type={type} value={value} onChange={(e) => onChange(e.target.value)} />
-    </label>
+    <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+      <div className="mb-4">
+        <h2 className="text-xl font-black tracking-tight text-slate-950">{title}</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
+      </div>
+      {children}
+    </section>
   );
 }
 
-function Select({
+function FieldInput({
   label,
   value,
   onChange,
-  options,
+  type = "text",
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: string[];
+  type?: string;
+  placeholder?: string;
 }) {
   return (
-    <label className="grid gap-2 text-sm text-slate-200">
+    <label className="grid gap-2 text-sm font-medium text-slate-700">
       <span>{label}</span>
-      <select className="input" value={value} onChange={(e) => onChange(e.target.value)}>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
+      <input className="field-input" type={type} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+    </label>
+  );
+}
+
+function FieldSelect({
+  label,
+  value,
+  onChange,
+  children,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="grid gap-2 text-sm font-medium text-slate-700">
+      <span>{label}</span>
+      <select className="field-input" value={value} onChange={(e) => onChange(e.target.value)}>
+        {children}
       </select>
     </label>
   );
+}
+
+function Th({ children, align = "left" }: { children: React.ReactNode; align?: "left" | "right" }) {
+  return <th className={`px-4 py-3 ${align === "right" ? "text-right" : "text-left"}`}>{children}</th>;
+}
+
+function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <td className={`border-t border-slate-200 px-4 py-4 align-top text-sm ${className}`}>{children}</td>;
+}
+
+function StatusPill({ value }: { value: BillingStatus }) {
+  const done = value === "Sudah Dibayar";
+  return <span className={done ? "pill pill-ok" : "pill pill-warn"}>{value}</span>;
 }

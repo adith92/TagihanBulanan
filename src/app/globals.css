@@ -1,49 +1,173 @@
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --bg: #f8fafc;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-strong: #ffffff;
+  --line: #dbe3ef;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #2563eb;
+  --accent-2: #0f766e;
+  --good: #059669;
+  --warn: #d97706;
+  --shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
 }
 
 html,
 body {
   margin: 0;
   min-height: 100%;
-  background: #020617;
+  background:
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 28%),
+    linear-gradient(180deg, #eef4ff 0%, #f8fafc 24%, #eef2f7 100%);
+  color: var(--text);
+  font-family: "Fira Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
-.input {
+body {
+  line-height: 1.6;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.field-input {
+  width: 100%;
+  min-height: 48px;
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(15, 23, 42, 0.9);
-  padding: 0.8rem 1rem;
-  color: white;
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  padding: 0.82rem 1rem;
+  color: var(--text);
   outline: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
-.input:focus {
-  border-color: rgba(125, 211, 252, 0.9);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+.field-input::placeholder {
+  color: #94a3b8;
 }
 
-.btn {
+.field-input:focus {
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-mini {
+  border: 1px solid transparent;
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.08);
-  padding: 0.8rem 1rem;
-  color: white;
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+  cursor: pointer;
+  min-height: 44px;
 }
 
-.btn:hover {
-  background: rgba(255, 255, 255, 0.14);
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-mini:hover {
   transform: translateY(-1px);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
-  border-color: rgba(96, 165, 250, 0.4);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  padding: 0.88rem 1.15rem;
+  font-weight: 700;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.2);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: var(--text);
+  padding: 0.86rem 1.1rem;
+  border-color: var(--line);
+}
+
+.btn-mini {
+  background: #f8fafc;
+  color: var(--text);
+  padding: 0.55rem 0.85rem;
+  border-color: var(--line);
+  min-height: 38px;
+  font-size: 0.875rem;
+}
+
+.stat-card {
+  border-radius: 1.5rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.stat-indigo {
+  background: linear-gradient(180deg, rgba(219, 234, 254, 0.95), rgba(255, 255, 255, 0.96));
+}
+
+.stat-emerald {
+  background: linear-gradient(180deg, rgba(209, 250, 229, 0.95), rgba(255, 255, 255, 0.96));
+}
+
+.stat-sky {
+  background: linear-gradient(180deg, rgba(224, 242, 254, 0.95), rgba(255, 255, 255, 0.96));
+}
+
+.stat-amber {
+  background: linear-gradient(180deg, rgba(254, 243, 199, 0.95), rgba(255, 255, 255, 0.96));
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.pill-ok {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+}
+
+.pill-warn {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+}
+
+th,
+td {
+  vertical-align: top;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+@media (max-width: 768px) {
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
 }
