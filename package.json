@@ -1,31 +1,21 @@
 {
-  "name": "tagihan-bulanan-yakin",
+  "name": "crmbycodex-tagihan-yakin",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "dev": "node src/server.js",
+    "start": "NODE_ENV=production node src/server.js",
+    "lint": "node --check src/server.js",
+    "test": "node --test"
   },
   "dependencies": {
-    "exceljs": "^4.4.0",
-    "jspdf": "^4.2.1",
-    "next": "16.2.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  },
-  "overrides": {
-    "uuid": "11.1.1"
+    "better-sqlite3": "^12.4.1",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.6.0",
+    "express": "^4.21.2",
+    "multer": "^2.0.2",
+    "pdfkit": "^0.17.2",
+    "xlsx": "^0.18.5"
   }
 }
