@@ -56,6 +56,12 @@ select {
     transform 180ms ease;
 }
 
+.field-input-compact {
+  min-height: 40px;
+  padding: 0.62rem 0.85rem;
+  border-radius: 0.9rem;
+}
+
 .field-input::placeholder {
   color: #94a3b8;
 }
@@ -107,6 +113,68 @@ select {
   border-color: var(--line);
   min-height: 38px;
   font-size: 0.875rem;
+}
+
+.month-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 0.7rem 1rem;
+  min-height: 44px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.month-chip:hover {
+  transform: translateY(-1px);
+}
+
+.month-chip-active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.2);
+}
+
+.month-chip-next {
+  border-style: dashed;
+}
+
+.month-chip-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  padding: 0.2rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.status-toggle {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.52rem 0.8rem;
+  min-height: 38px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.status-toggle-active {
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.3);
+  color: #1d4ed8;
 }
 
 .stat-card {
@@ -167,6 +235,11 @@ table {
 @media (max-width: 768px) {
   .btn-primary,
   .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .month-chip {
     width: 100%;
     justify-content: center;
   }
