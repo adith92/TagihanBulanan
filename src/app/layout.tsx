@@ -1,33 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Aplikasi Pembayaran Tagihan Listrik Sekolah",
-  description: "Dashboard kas & tagihan operasional listrik sekolah",
+  title: "Sistem Tagihan Operasional Sekolah YAKIN",
+  description: "Aplikasi tagihan baru untuk CRUD, filter, summary, import/export, dan PDF siap cetak.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="id">
+      <body>{children}</body>
     </html>
   );
 }

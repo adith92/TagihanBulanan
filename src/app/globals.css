@@ -1,191 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  
-  --card-bg: rgba(255, 255, 255, 0.7);
-  --card-border: rgba(226, 232, 240, 0.8);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+html,
 body {
-  background: radial-gradient(circle at top right, rgba(241, 245, 249, 0.5), rgba(248, 250, 252, 1)), 
-              radial-gradient(circle at bottom left, rgba(230, 242, 255, 0.3), rgba(248, 250, 252, 1));
-  color: var(--foreground);
-  min-height: 100vh;
+  margin: 0;
+  min-height: 100%;
+  background: #020617;
 }
 
-/* Glassmorphism custom classes */
-.glass-panel {
-  background: var(--card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--glass-shadow);
+* {
+  box-sizing: border-box;
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(226, 232, 240, 0.5);
-  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.02);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.input {
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.9);
+  padding: 0.8rem 1rem;
+  color: white;
+  outline: none;
 }
 
-.glass-card:hover {
-  background: rgba(255, 255, 255, 0.8);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.05);
+.input:focus {
+  border-color: rgba(125, 211, 252, 0.9);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
 }
 
-/* Custom Scrollbar for premium aesthetic */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.btn {
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.8rem 1rem;
+  color: white;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+.btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 10px;
+.btn-primary {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  border-color: rgba(96, 165, 250, 0.4);
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
-}
-
-/* Print Styles for clean and professional documents */
-@media print {
-  @page {
-    size: A4 portrait;
-    margin: 15mm;
-  }
-
-  body {
-    background: #ffffff !important;
-    background-image: none !important;
-    color: #090d16 !important;
-    font-family: ui-sans-serif, system-ui, sans-serif !important;
-    min-height: auto !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Hide screen interactive elements completely on print */
-  .print\:hidden,
-  .no-print,
-  button,
-  input,
-  select,
-  [role="button"],
-  iframe,
-  .toast-alert {
-    display: none !important;
-  }
-
-  /* Restructure spacing and layouts for A4 print */
-  .print\:p-0 {
-    padding: 0 !important;
-  }
-
-  .print\:m-0 {
-    margin: 0 !important;
-  }
-
-  .print\:max-w-none {
-    max-width: none !important;
-    width: 100% !important;
-  }
-
-  /* Force display components specifically designed for print */
-  .print\:block {
-    display: block !important;
-  }
-
-  .print\:flex {
-    display: flex !important;
-  }
-
-  .print\:grid {
-    display: grid !important;
-  }
-
-  /* Grid stat cards printing formatting */
-  .glass-card {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    transform: none !important;
-    transition: none !important;
-    color: #0f172a !important;
-    border-radius: 12px !important;
-    margin-bottom: 0 !important;
-  }
-
-  /* Avoid page breaks inside cards or summary items */
-  .glass-card, 
-  tr, 
-  .page-break-inside-avoid {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-
-  /* Hard reset shadows and blur for print */
-  .glass-panel {
-    background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-  }
-
-  /* Strict high-contrast grid lines for tables in print */
-  table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    margin-top: 10px !important;
-  }
-
-  thead {
-    display: table-header-group !important;
-  }
-
-  tr {
-    border-bottom: 1px solid #cbd5e1 !important;
-  }
-
-  th {
-    font-weight: 700 !important;
-    color: #0f172a !important;
-    border-bottom: 2px solid #0f172a !important;
-    background-color: #f8fafc !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  td, th {
-    padding: 10px 12px !important;
-    text-align: left !important;
-  }
-
-  /* Hide background aesthetic blobs or other random visuals */
-  body::before,
-  body::after {
-    display: none !important;
-  }
-}
-
