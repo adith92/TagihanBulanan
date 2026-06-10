@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import ExcelJS from "exceljs";
 import { jsPDF } from "jspdf";
-import * as XLSX from "xlsx";
 
 type BillingStatus = "Sudah Dibayar" | "Belum Dibayar";
 type BillingChannel = "Tokopedia" | "Shopee" | "Blibli" | "Website" | "Tunai";
@@ -135,18 +135,43 @@ function mapLegacyRow(raw: Record<string, string>, index: number): ImportPreview
   return { rowNumber: index + 2, data, errors, reviewReasons, safe: errors.length === 0 && reviewReasons.length === 0 };
 }
 
-function parseImportFile(content: string | ArrayBuffer, fileName: string): ImportPreviewRow[] {
+function cellToString(value: ExcelJS.CellValue) {
+  if (value === null || value === undefined) return "";
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "object") {
+    if ("text" in value && value.text) return String(value.text);
+    if ("result" in value && value.result !== undefined) return String(value.result);
+    if ("richText" in value && Array.isArray(value.richText)) return value.richText.map((item) => item.text).join("");
+  }
+  return String(value);
+}
+
+async function parseImportFile(content: string | ArrayBuffer, fileName: string): Promise<ImportPreviewRow[]> {
   const ext = fileName.split(".").pop()?.toLowerCase();
   if (ext === "csv") {
     const text = typeof content === "string" ? content : new TextDecoder().decode(content);
     return parseCsv(text).map((row, index) => mapLegacyRow(row, index));
   }
 
-  const workbook = XLSX.read(content, { type: typeof content === "string" ? "string" : "array" });
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
+  const workbook = new ExcelJS.Workbook();
+  const buffer = typeof content === "string" ? new TextEncoder().encode(content).buffer : content;
+  await workbook.xlsx.load(buffer);
+  const sheet = workbook.worksheets[0];
+  if (!sheet) return [];
+
+  const headers = sheet.getRow(1).values as ExcelJS.CellValue[];
+  const rows: Record<string, string>[] = [];
+  sheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) return;
+    const record: Record<string, string> = {};
+    headers.slice(1).forEach((header, index) => {
+      record[normalizeHeader(cellToString(header))] = cellToString(row.getCell(index + 1).value);
+    });
+    rows.push(record);
+  });
+
   return rows.map((row, index) => {
-    const normalized = Object.fromEntries(Object.entries(row).map(([k, v]) => [normalizeHeader(k), String(v ?? "")]));
+    const normalized = Object.fromEntries(Object.entries(row).map(([k, v]) => [normalizeHeader(k), v]));
     return mapLegacyRow(normalized, index);
   });
 }
@@ -157,21 +182,33 @@ function exportCsv(rows: BillingRow[]) {
   return `${header.join(",")}\n${body.join("\n")}\n`;
 }
 
-function exportXlsx(rows: BillingRow[]) {
-  const data = rows.map((row) => ({
-    bulan: row.bulan,
-    tahun: row.tahun,
-    kategori: row.kategori,
-    deskripsi: row.deskripsi,
-    nomor_tagihan: row.nomor_tagihan,
-    jumlah_tagihan: row.jumlah_tagihan,
-    channel_pembayaran: row.channel_pembayaran,
-    status_bayar: row.status_bayar,
-  }));
-  const worksheet = XLSX.utils.json_to_sheet(data);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Tagihan");
-  return XLSX.write(workbook, { type: "array", bookType: "xlsx" });
+async function exportXlsx(rows: BillingRow[]) {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Tagihan");
+  worksheet.columns = [
+    { header: "bulan", key: "bulan", width: 10 },
+    { header: "tahun", key: "tahun", width: 10 },
+    { header: "kategori", key: "kategori", width: 18 },
+    { header: "deskripsi", key: "deskripsi", width: 34 },
+    { header: "nomor_tagihan", key: "nomor_tagihan", width: 22 },
+    { header: "jumlah_tagihan", key: "jumlah_tagihan", width: 18 },
+    { header: "channel_pembayaran", key: "channel_pembayaran", width: 22 },
+    { header: "status_bayar", key: "status_bayar", width: 18 },
+  ];
+  rows.forEach((row) => {
+    worksheet.addRow({
+      bulan: row.bulan,
+      tahun: row.tahun,
+      kategori: row.kategori,
+      deskripsi: row.deskripsi,
+      nomor_tagihan: row.nomor_tagihan,
+      jumlah_tagihan: row.jumlah_tagihan,
+      channel_pembayaran: row.channel_pembayaran,
+      status_bayar: row.status_bayar,
+    });
+  });
+  worksheet.getRow(1).font = { bold: true };
+  return workbook.xlsx.writeBuffer();
 }
 
 function download(name: string, blob: Blob) {
@@ -307,14 +344,14 @@ export default function Home() {
   function handleImport(file: File) {
     setImporting(true);
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const content = reader.result;
       if (!content) {
         setNotice("File tidak bisa dibaca.");
         setImporting(false);
         return;
       }
-      const parsed = parseImportFile(content, file.name);
+      const parsed = await parseImportFile(content, file.name);
       setPreview(parsed);
       const safeRows = parsed
         .filter((item) => item.safe && item.data)
@@ -443,11 +480,13 @@ export default function Home() {
                 <button
                   className="btn-secondary"
                   onClick={() =>
-                    download(
-                      "tagihan-yakin.xlsx",
-                      new Blob([exportXlsx(filteredRows)], {
-                        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                      }),
+                    exportXlsx(filteredRows).then((data) =>
+                      download(
+                        "tagihan-yakin.xlsx",
+                        new Blob([data], {
+                          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        }),
+                      ),
                     )
                   }
                 >
