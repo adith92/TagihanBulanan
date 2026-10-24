@@ -91,7 +91,7 @@ flowchart TB
 
 Proses setup satu kali oleh pemilik akun Google:
 
-1. 📂 Di Google Drive pribadi, temukan file privat **`tagihanbulanan-state-v3.json`** yang sudah diimpor. Salin **file ID** dari link Drive (bukan seluruh link).
+1. 📂 Di Google Drive pribadi, temukan file privat **`tagihanbulanan-state.json`** yang sudah diimpor. Salin **file ID** dari link Drive (bukan seluruh link).
 2. ⚙️ Buka [script.google.com](https://script.google.com) → **New project** → tempel seluruh isi [`apps-script/Code.gs`](apps-script/Code.gs). Beri nama `TagihanBulanan Drive Bridge`.
 3. 🔑 Pada **Project Settings → Script Properties**, tambahkan:
    - `DATA_FILE_ID` = ID file JSON dari langkah 1.
