@@ -1,7 +1,7 @@
 # PRD v1.0 — Aplikasi Pembukuan Tagihan Bulanan Sekolahan
 
 **Tanggal:** 24 Oktober 2026  
-**Status:** Implementasi web telah dideploy. Penyimpanan permanen menunggu koneksi Vercel Blob Private. Data historis akan diimpor melalui CSV setelah layanan siap.  
+**Status:** v3.0. Source web disiapkan dan 2.440 baris dari file Numbers asli telah diimpor ke Drive privat. Save live masih menunggu pemilik menerbitkan Apps Script dan mengatur Vercel environment variables.  
 **Platform:** Aplikasi web responsif (PC dan HP)  
 **Akses:** 1 pemilik akun (single-user)  
 **Mata uang:** IDR  
@@ -172,11 +172,11 @@ Auth wajib untuk setiap API, ditambah pembatasan akses data secara server-side.
 
 ## 10. Arsitektur rekomendasi
 - Frontend + API: Next.js (TypeScript) + Tailwind CSS.
-- Database: PostgreSQL terkelola (contohnya Supabase).
+- Database untuk tahap personal: file JSON privat di Google Drive, diakses hanya oleh Apps Script atas izin pemilik. Gunakan database PostgreSQL bila skala atau jumlah editor meningkat.
 - Login: satu akun, autentikasi aman; RLS atau enforcement owner pada server.
 - Hosting: Vercel untuk aplikasi web.
-- Storage: penyimpanan terproteksi bagi file impor dan backup; hindari URL publik untuk file pribadi.
-- Backup: backup database terjadwal menurut kemampuan paket yang dipilih + ekspor manual data.
+- Storage: Google Drive pribadi dengan JSON sumber, backup Numbers asli, XLSX, CSV, dan laporan audit. Jangan publikasikan URL file pribadi.
+- Backup: ekspor manual dan file backup Drive; jadwal backup otomatis merupakan peningkatan berikutnya.
 - Deploy staging sebelum production; environment variables untuk seluruh rahasia, validasi input server-side, HTTPS.
 
 ## 11. Alur inti
@@ -237,4 +237,4 @@ flowchart TD
 - Tidak ada autosave tersembunyi; **Save manual adalah sumber kebenaran**.
 
 ---
-**Catatan tahap kerja:** Dokumen ini PRD/desain arsitektur, bukan bukti bahwa aplikasi sudah dibangun, data sudah diimpor, atau server sudah aktif.
+**Catatan tahap kerja:** Implementasi web sudah dibangun. Impor file asli ke Google Drive privat selesai. Fitur Save live **belum diaktifkan** sebelum konfigurasi Google Apps Script oleh pemilik dan uji penyimpanan sukses. Lihat `docs/IMPORT_REPORT.md`.

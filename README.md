@@ -1,26 +1,20 @@
 <div align="center">
 
-# 💙⚡ TagihanBulanan
+<img src="docs/assets/tagihanbulanan-showcase.png" width="100%" alt="Ilustrasi desain aplikasi tagihan bulanan untuk desktop dan HP" />
 
-### 🏫📒 Pembukuan Tagihan Bulanan Sekolahan
+# ⚡💙 TagihanBulanan
+### 🏫 📒 Pembukuan Tagihan Bulanan | PC 💻 & HP 📱
 
-**⚡ Tagihan listrik · 💧 Air/PAM · ☎️ Telkom · 🌐 Internet · 🛒 Platform pembayaran**
+**🔁 Tagihan berulang · 💾 Save ke Google Drive · 📊 Riwayat lengkap · ✅ Status pembayaran · 🖨️ Bukti cetak**
 
-> ✨ **Catat tagihan sekali, lanjutkan otomatis setiap bulan.** Gak perlu bikin sheet baru dari nol!
+[![🚀 Live App](https://img.shields.io/badge/🚀_BUKA_APLIKASI-TagihanBulanan-2563EB?style=for-the-badge)](https://tagihanbulanan.vercel.app)
+[![🧠 Version](https://img.shields.io/badge/Version-3.0.0-8B5CF6?style=for-the-badge)](https://github.com/adith92/TagihanBulanan)
+[![☁️ Google Drive](https://img.shields.io/badge/Storage-Google_Drive-16A34A?style=for-the-badge)](#-database-google-drive)
+[![⚡ Vercel](https://img.shields.io/badge/Hosting-Vercel-black?style=for-the-badge)](https://vercel.com/)
 
-[![🌍 Aplikasi Web](https://img.shields.io/badge/🌍_Web-PC_&_HP-2764e7?style=for-the-badge)](https://tagihanbulanan.vercel.app)
-[![⚡ Deploy](https://img.shields.io/badge/⚡_Vercel-Deployed-black?style=for-the-badge)](https://tagihanbulanan.vercel.app)
-![🧑‍💻 Single User](https://img.shields.io/badge/Single_User-🔐_Private-9b5de5?style=for-the-badge)
-![🧮 Rupiah](https://img.shields.io/badge/Currency-IDR-16a085?style=for-the-badge)
-![📦 Version](https://img.shields.io/badge/Version-2.1.0-ff9b42?style=for-the-badge)
+**✨ “Sekali catat, muncul lagi tiap bulan.” ✨**
 
-### 🌈 Sekilas Tampilannya
-
-<img src="docs/assets/tagihanbulanan-dashboard.png" alt="Ilustrasi konseptual tampilan aplikasi TagihanBulanan pada laptop dan HP" width="100%" />
-
-*🎨 Gambar di atas adalah **ilustrasi rancangan**, bukan screenshot dari data asli atau bukti fitur server sudah aktif.*
-
-**[🚀 Buka Aplikasi](https://tagihanbulanan.vercel.app)** · **[📖 Dokumen PRD](docs/PRD.md)** · **[🛠️ Setup Deployment](#-deploy-ke-vercel)**
+[🌍 Website](https://tagihanbulanan.vercel.app) • [🎨 Galeri UI](#-tampilan-aplikasi) • [☁️ Koneksi Drive](#-cara-aktifkan-save-ke-google-drive) • [📑 PRD](docs/PRD.md) • [🧾 Audit Import](docs/IMPORT_REPORT.md)
 
 </div>
 
@@ -28,178 +22,172 @@
 
 ## 🧭 Apa itu TagihanBulanan?
 
-**TagihanBulanan** adalah aplikasi pencatatan **tagihan rutin bulanan** untuk satu pemilik, dibuat berdasarkan kebutuhan workbook `Tagihan Listrik Sekolahan.numbers`. Bukan aplikasi akuntansi penuh, bukan pencatatan laba-rugi, dan bukan aplikasi pembayaran otomatis.
+Aplikasi pencatat tagihan rutin satu pengguna yang menggantikan penggunaan banyak tab spreadsheet. Dibuat ulang khusus dari spesifikasi pengguna dan file **`Tagihan Listrik Sekolahan.numbers`**, tanpa mengambil **kode, aset, atau dependensi aplikasi versi lama**.
 
-🎯 Fokusnya sederhana: **nominal bulan lalu otomatis dibawa ke bulan baru, tapi status pembayarannya harus dicentang ulang**. Riwayat bulan sebelumnya aman dan tidak ikut berubah.
+⚠️ **Status:** Web Vercel sudah tersedia. **Data 2.440 transaksi telah diekstrak dari file Numbers asli dan diimpor ke Google Drive pribadi sebagai JSON, Excel, CSV dan backup asli.** Namun **tombol Save di website baru aktif setelah pemilik menerbitkan Google Apps Script Web App dan mengisi 2 variabel Vercel**. Sampai saat itu, website tetap dalam *mode pratinjau*. Jangan melakukan transaksi nyata dalam mode pratinjau.
 
-> 🚦 **STATUS PRODUKSI**: Website berhasil dideploy di Vercel. **Penyimpanan permanen belum aktif** karena Vercel Blob Private belum terhubung (`storageReady: false`). Sebelum tersambung, halaman hanya berfungsi sebagai **pratinjau**, dan Save tidak tersedia. **Jangan memasukkan data pembayaran sungguhan dalam mode pratinjau.**
+## 🎨 Tampilan aplikasi
 
-## 🎁 Fitur utamanya
+<p align="center">
+<img src="docs/assets/tagihanbulanan-dashboard.png" alt="Ilustrasi tampilan dashboard dan table pembayaran tagihan pada desktop dan HP" width="100%" />
+</p>
 
-| Ikon | Fitur | Fungsinya |
+<p align="center">
+<img src="docs/assets/tagihanbulanan-workflow.png" alt="Ilustrasi alur tagihan berulang bulanan, pembayaran, cetak dan ekspor" width="100%" />
+</p>
+
+> 🖼️ Ketiga gambar adalah **ilustrasi konsep** yang digunakan untuk dokumentasi, bukan screenshot produksi atau bukti koneksi database sudah aktif.
+
+## 🎁 Fitur
+
+| 🎨 | Menu | Detail |
 |:---:|---|---|
-| 📆🔁 | **Pengulangan otomatis** | Tagihan aktif akan muncul lagi pada periode bulan berikutnya. |
-| 💰📝 | **Nominal fleksibel** | Nominal sebelumnya menjadi nilai awal. Angkanya tetap bisa diedit. |
-| ✅ | **Checkbox “Sudah”** | Menandai pembayaran lunas untuk bulan tersebut. |
-| 🖨️✅ | **Checkbox “Cetak”** | Menandai bukti pembayaran sudah dicetak. |
-| 🛒 | **Platform bayar / “Toko”** | Catat Shopee, Tokopedia, DANA, atau platform lainnya. |
-| 🗂️ | **Kategori dinamis** | Tambah, edit nama, atau arsipkan kategori. |
-| ➕➖ | **Baris tagihan** | Tambah dan sembunyikan baris pada bulan yang dipilih. |
-| 📊 | **Dashboard ringkasan** | Total, sudah dibayar, belum dibayar, dan bukti belum dicetak. |
-| 🕘 | **Riwayat per bulan** | Setiap periode menjadi snapshot yang independen. |
-| 💾☁️ | **Save ke server** | Simpan perubahan secara eksplisit saat penyimpanan privat siap. |
-| 📥📤 | **Impor / ekspor** | Impor CSV dan ekspor Excel `.xlsx` atau CSV. File Excel bisa dibuka di Apple Numbers. |
-| 📱💻 | **Responsif** | Digunakan melalui browser PC maupun HP. |
-| 🔐 | **Akses satu pemilik** | Satu akun admin menggunakan password dan sesi cookie aman. |
+| 📆🔄 | **Ulang bulan otomatis** | Tagihan muncul lagi dengan nominal terbaru bulan sebelumnya. |
+| 💰✏️ | **Edit nominal** | Setiap bulan bebas punya nominal berbeda. |
+| ✅ | **Sudah** | Checkbox tagihan telah dibayar. |
+| 🖨️ | **Cetak** | Checkbox bukti sudah dicetak. |
+| 🛒 | **Toko** | Tempat pembayaran seperti Tokopedia, Shopee, Blibli, DANA. |
+| 🏷️ | **Kategori** | Tambah, edit nama, arsipkan. |
+| ➕➖ | **Baris** | Tambah baris dan sembunyikan baris pada bulan aktif. |
+| 📊📈 | **Dashboard** | Total tagihan, terbayar, belum dibayar, bukti belum dicetak. |
+| 📚🕰️ | **Riwayat** | Snapshot per bulan, tidak merusak bulan lama. |
+| ☁️💾 | **Save** | Simpan ke file JSON privat di Google Drive melalui Google Apps Script. |
+| 📥📤 | **Impor / Ekspor** | Impor CSV, ekspor Excel `.xlsx` dan CSV. Excel bisa dibuka melalui Apple Numbers. |
+| 🔐 | **Single-user** | Password dan sesi admin memakai cookie HttpOnly. |
+| 📱💻 | **Responsif** | Web untuk PC dan ponsel. |
 
-<div align="center">
-  <img src="docs/assets/tagihanbulanan-workflow.png" alt="Ilustrasi fitur, format file dan langkah deployment TagihanBulanan" width="100%" />
-  <sub>✨ Infografik ilustratif. Angka dan data pada visual bukan catatan transaksi sungguhan.</sub>
-</div>
-
----
-
-## 🔄 Cara kerja tagihan bulanan
+## 🔁 Logika tagihan tiap bulan
 
 ```mermaid
 flowchart LR
-  A[📆 Bulan Oktober] --> B[🧾 Tagihan & nominal]
-  B --> C[🔁 Buat bulan November]
-  C --> D[💰 Salin nominal terakhir]
-  D --> E[☐ Sudah = belum]
-  E --> F[☐ Cetak = belum]
-  F --> G[✏️ Ubah jika diperlukan]
-  G --> H[💾 Save ke server]
+  A[📆 Oktober] --> B[🧾 Nominal asli]
+  B --> C[📆 November]
+  C --> D[💰 Salin nominal sebelumnya]
+  D --> E[☐ Sudah direset]
+  E --> F[☐ Cetak direset]
+  F --> G[✏️ Koreksi nominal]
+  G --> H[☁️💾 Save ke Drive]
 ```
 
-**Contoh:** Oktober bayar listrik Rp1.250.000. November otomatis muncul **Rp1.250.000**, tetapi checkbox **Sudah** dan **Cetak** kembali kosong. Saat nominal November diubah, data Oktober tidak ikut berubah. 🧷
+**Contoh:** Listrik Oktober Rp1.250.000 dan sudah dibayar ✅. Pada November muncul Rp1.250.000 lagi, tetapi **Sudah ❌** dan **Cetak ❌**. Semua histori bulan Oktober tetap utuh.
 
-## 🖥️ Struktur aplikasi
+## 🗄️ Database: Google Drive
+
+**Ya, Google Drive bisa dipakai sebagai penyimpanan untuk aplikasi kecil satu pemilik.** File JSON privat di Drive menjadi *source of truth*. Bukan database SQL, tetapi cukup untuk ribuan baris dan pemakaian personal; karena setiap Save menulis satu dokumen utuh, pilihan ini tidak cocok untuk banyak editor bersamaan.
+
+```mermaid
+flowchart TB
+  USER[📱💻 Browser PC / HP] --> API[🔐 Vercel serverless API]
+  API -->|HTTPS + secret server-only| GAS[⚙️ Google Apps Script Web App]
+  GAS -->|DriveApp + LockService| DRIVE[(☁️💾 Private Google Drive JSON)]
+  DRIVE -->|83 periode dan 2.440 baris awal| GAS
+  GAS --> API
+  API --> USER
+```
+
+🛡️ **Keamanan:** file tagihan tidak ada di repository publik, hanya Google Drive pribadi; password dan bridge secret disimpan sebagai Vercel Environment Variables + Apps Script Script Properties, bukan ditulis di GitHub. Save punya validasi nomor versi untuk menghindari menimpa perubahan dari tab lain.
+
+### 🔌 Cara aktifkan Save ke Google Drive
+
+Proses setup satu kali oleh pemilik akun Google:
+
+1. 📂 Di Google Drive pribadi, temukan file privat **`tagihanbulanan-state-v3.json`** yang sudah diimpor. Salin **file ID** dari link Drive (bukan seluruh link).
+2. ⚙️ Buka [script.google.com](https://script.google.com) → **New project** → tempel seluruh isi [`apps-script/Code.gs`](apps-script/Code.gs). Beri nama `TagihanBulanan Drive Bridge`.
+3. 🔑 Pada **Project Settings → Script Properties**, tambahkan:
+   - `DATA_FILE_ID` = ID file JSON dari langkah 1.
+   - `BRIDGE_SECRET` = token acak panjang minimal 32 karakter, yang disimpan pribadi.
+4. 🧪 Jalankan `testDriveConnection` satu kali untuk mengotorisasi akses Google Drive pribadi. Lihat Execution log. Hanya akan membaca metadata, tidak menghapus data.
+5. 🚀 **Deploy → New deployment → Web app**. `Execute as: Me`, `Who has access: Anyone`, lalu **Deploy**. Akses anonim ke web app tetap dilindungi shared secret di tiap request. Jangan bagikan secret.
+6. 🔐 Di **Vercel → Project Settings → Environment Variables**, isi `GDRIVE_BRIDGE_URL` = URL `/exec` Google Apps Script dan `GDRIVE_BRIDGE_SECRET` = secret yang sama. Target **Production**.
+7. 🔄 **Redeploy** production. Endpoint `/api/health` harus menunjukkan `authReady: true` dan `storageReady: true`.
+8. ✅ **Uji sungguhan:** login → buka data historis → tambah 1 baris tes → **Save** → refresh browser → pastikan data tetap ada. Hapus baris tes lalu Save lagi.
+
+📌 **Penting:** `storageReady: true` berarti variabel konfigurasi ada, bukan jaminan aplikasi berhasil menulis Drive. Uji Save dan refresh wajib dilakukan.
+
+⚠️ **Google Apps Script perlu diotorisasi langsung oleh pemilik Drive.** Koneksi Google Drive yang tersedia di ChatGPT tidak otomatis memberikan akses server Vercel. Jangan tempel token/credential di issues, PR, atau README.
+
+## 📦 Hasil impor Numbers asli
+
+| Pemeriksaan | Hasil |
+|---|---|
+| 📂 Nama file asli | `Tagihan Listrik Sekolahan.numbers` |
+| 📅 Periode | **November 2019 → Oktober 2026** |
+| 📆 Jumlah bulan | **83** (Februari 2020 memang tidak ada tab di file asal) |
+| 🧾 Baris tagihan | **2.440** |
+| 🗂️ Kategori normalisasi | **6** |
+| 📄 Backup Drive | File asli, JSON aplikasi, Excel, CSV, audit impor |
+| ✅ Sudah dan 🖨️ Cetak | Dibaca langsung dari kedua kolom checkbox asli |
+| 💡 Nominal kosong | Dicatat dan dilacak dengan `sourceAmountBlank=true` (di UI nominal dasar menjadi 0, bukan dianggap sudah dibayar) |
+| 🛠️ Koreksi | Judul kategori `a` pada April 2023 dibaca sebagai PAM Jakarta berdasarkan baris sebelum/sesudahnya; seluruh baris asli tercatat dalam backup audit |
+
+**Semua data finansial disimpan di folder Google Drive privat.** Repo ini hanya memuat source code, gambar ilustrasi dan laporan hitungan agregat, bukan identitas pelanggan atau transaksi mentah.
+
+📑 Detail impor dan batasan: [`docs/IMPORT_REPORT.md`](docs/IMPORT_REPORT.md).
+
+## 🧑‍💻 Struktur proyek
 
 ```text
-📁 TagihanBulanan/
-├── 📄 README.md              # Dokumentasi utama ini
-├── 🌐 public/
-│   ├── index.html            # Tampilan web
-│   ├── style.css             # Layout PC dan HP
-│   ├── app.js                # Interaksi dan editor tagihan
-│   ├── model.js              # Aturan tagihan di browser
-│   └── export.js             # Ekspor Excel / CSV
-├── 🔌 api/
-│   ├── health.js             # Status konfigurasi
-│   ├── login.js              # Login
-│   ├── logout.js             # Logout
-│   ├── session.js            # Status sesi
-│   └── state.js              # Baca / Save state privat
-├── 🧠 lib/
-│   ├── model.js              # Validasi dan logika per bulan
-│   ├── auth.js               # Password dan sesi admin
-│   └── storage.js            # Vercel Blob Private
-├── 🖼️ docs/
-│   ├── PRD.md                # Kebutuhan dan ketentuan produk
-│   └── assets/               # Ilustrasi dokumentasi
-├── 🧪 test/                  # Unit test
+📁 TagihanBulanan
+├── 📄 README.md                   Dokumentasi bergambar ini
+├── 📱 public/                     Halaman dan logika frontend
+│   ├── index.html
+│   ├── app.js
+│   ├── model.js
+│   ├── export.js
+│   └── style.css
+├── 🔌 api/                        Login, session, state, health
+├── 💾 lib/storage.js             Google Apps Script bridge (tanpa Blob)
+├── 🔐 lib/auth.js                Cookie sesi dan hash password
+├── 🧠 lib/model.js               Validasi dan snapshot bulan
+├── ☁️ apps-script/               Google Drive Web App Bridge
+│   ├── Code.gs
+│   └── appsscript.json
+├── 🖼️ docs/assets/               3 gambar ilustrasi
+├── 📘 docs/PRD.md
+├── 📑 docs/IMPORT_REPORT.md
+├── 🧪 test/
 ├── ⚙️ package.json
 └── 🚀 vercel.json
 ```
 
-## 🛡️ Bagaimana data disimpan?
-
-```mermaid
-flowchart TD
-  USER[📱💻 Pemilik aplikasi] -->|HTTPS| UI[🌐 Antarmuka web]
-  UI -->|Login dan Save| API[🔐 Vercel Serverless API]
-  API -->|Token di sisi server| DB[(💾 Vercel Blob Private)]
-  API -->|Status tersimpan atau error| UI
-```
-
-💡 Tombol **Save** hanya menganggap data tersimpan setelah server menyatakan berhasil. Jika ada konflik dari dua tab, operasi penyimpanan ditolak agar catatan tidak tertimpa.
-
-### 🔒 Catatan keamanan
-
-- 🔑 Password **tidak ditulis di source code**.
-- 🍪 Sesi memakai cookie `HttpOnly`, `Secure`, dan `SameSite=Strict`.
-- 🧱 Data pribadi tidak disimpan sebagai file JSON publik pada repo GitHub.
-- 🧹 Project ini merupakan **implementasi baru yang berdiri sendiri**; tidak mengambil kode atau data dari commit aplikasi sebelumnya.
-- ⚠️ Blob JSON dipilih untuk tahap MVP satu pengguna. Jika nanti kebutuhan meningkat, migrasi ke database relasional disarankan.
-
----
-
-## 🚀 Deploy ke Vercel
-
-**Repository:** [`adith92/TagihanBulanan`](https://github.com/adith92/TagihanBulanan)  
-**Website:** [**tagihanbulanan.vercel.app**](https://tagihanbulanan.vercel.app)
-
-1. 🔗 Hubungkan repository ke project Vercel `tagihanbulanan`. Production branch = `main`.
-2. 📦 Build Command: `npm run build`; Output Directory: `dist`.
-3. ☁️ Buka Vercel **Storage**, buat **Blob dengan akses Private**, lalu hubungkan ke project.
-4. 🔑 Pastikan variabel server ada: `BLOB_READ_WRITE_TOKEN`, `APP_PASSWORD_SALT`, `APP_PASSWORD_HASH`, dan `SESSION_SECRET`.
-5. 🚀 Redeploy Vercel production setelah konfigurasi storage aktif.
-6. 🧪 Periksa endpoint `/api/health`: `authReady: true` dan `storageReady: true`.
-7. 🧪 **Uji sungguhan**: login → tambah tagihan → Save → refresh → pastikan tagihan masih ada.
-
-> ⚠️ `storageReady: true` hanya menandakan variabel storage ditemukan, **bukan bukti data sudah berhasil tersimpan**. Uji Save dan refresh tetap wajib.
-
-**Membuat password hash di komputer lokal:**
+## 🧪 Development dan deploy
 
 ```bash
-node -e "const c=require('node:crypto');const salt=c.randomBytes(16).toString('hex'),pass=c.randomBytes(18).toString('base64url');console.log('PASSWORD=',pass);console.log('APP_PASSWORD_SALT=',salt);console.log('APP_PASSWORD_HASH=',c.createHash('sha256').update(salt+':'+pass).digest('hex'));console.log('SESSION_SECRET=',c.randomBytes(32).toString('hex'))"
+npm test        # ✅ unit test
+npm run lint   # 🔎 cek sintaks
+npm run build  # 🏗️ siapkan dist/
 ```
 
-🔐 Simpan password pada password manager. **Jangan commit password, token, atau file `.env.local`.**
+🌍 Website: **[https://tagihanbulanan.vercel.app](https://tagihanbulanan.vercel.app)**  
+🐙 Repository: **[https://github.com/adith92/TagihanBulanan](https://github.com/adith92/TagihanBulanan)**
 
-## 🗃️ Impor sejarah pembayaran 2020–2026
+Vercel: production branch = `main`, build command = `npm run build`, output directory = `dist`. Backend menggunakan serverless functions di folder `api/`.
 
-**Riwayat transaksi adalah data milik pemilik aplikasi dan tidak dipublikasikan di GitHub.** Untuk memigrasikan arsip Numbers, lakukan ekspor menjadi `.csv` lalu gunakan menu **Impor & Ekspor** di aplikasi.
+### 🔐 Environment variables
 
-- 📄 Berkas asal: `Tagihan Listrik Sekolahan.numbers`.
-- 📥 Impor sekarang mendukung **CSV**. Impor langsung `.numbers` atau `.xlsx` belum tersedia.
-- 🗓️ Gunakan kolom `periode` (`YYYY-MM`) apabila satu CSV memuat beberapa bulan. Bila kolom periode tidak ada, pilih bulan tujuan saat import.
-- 🧾 Kolom yang didukung: nama/deskripsi, nomor pelanggan, kategori, tagihan, platform/toko, sudah/bayar, cetak, dan periode.
-- 🧪 Cek jumlah baris dan nilai rupiah per periode terhadap file sumber sebelum menekan Save.
-- 🖨️ Status **Cetak** yang tidak ada di file sumber harus diperiksa manual, bukan ditebak.
-- 🔒 Data historis akan tersimpan secara privat **setelah** storage berfungsi dan tombol Save berhasil.
-
-> 📌 **Belum dimigrasikan:** Riwayat di workbook belum tersedia di database live. Kami tidak melakukan impor otomatis dari kode/aplikasi sebelumnya.
-
-## 📊 Format ekspor
-
-| Format | Status | Penggunaan |
-|---|---|---|
-| 📗 Excel `.xlsx` | ✅ Ekspor tersedia | Buka di Excel, LibreOffice, dan Apple Numbers |
-| 📄 CSV `.csv` | ✅ Ekspor dan impor tersedia | Backup sederhana dan pertukaran data |
-| 🍏 Numbers `.numbers` | 🔶 Tidak diekspor langsung | Buka file `.xlsx` di aplikasi Numbers |
-
-## 🧪 Developer quick start
-
-```bash
-npm install
-npm test
-npm run lint
-npm run build
+```dotenv
+APP_PASSWORD_SALT=<random salt>
+APP_PASSWORD_HASH=<sha256 salt:password>
+SESSION_SECRET=<long session secret>
+GDRIVE_BRIDGE_URL=https://script.google.com/macros/s/DEPLOYMENT_ID/exec
+GDRIVE_BRIDGE_SECRET=<shared key >=32 characters>
 ```
 
-Untuk menjalankan API lokal: instal Vercel CLI, link project yang sesuai, lalu jalankan `vercel dev` setelah memasang environment variables secara aman. Jangan gunakan SQLite di `/tmp` sebagai database Vercel.
+> Jangan commit `.env.local`, password admin, atau token. Situs publik tidak menampilkan isi Google Drive sebelum autentikasi dan koneksi selesai.
 
-## 📡 Endpoint API
+## 🗑️ Tentang kode lama
 
-| Endpoint | Method | Deskripsi |
-|---|---|---|
-| `/api/health` | GET | Informasi kesiapan konfigurasi |
-| `/api/session` | GET | Status login |
-| `/api/login` | POST | Masuk |
-| `/api/logout` | POST | Keluar |
-| `/api/state` | GET | Baca state privat, perlu login |
-| `/api/state` | PUT | Save state privat, perlu login |
+✅ Isi source code branch `main` dibangun ulang tanpa menggunakan kode lama, SQLite, migrasi dengan URL commit lama, atau Vercel Blob. Seluruh data diambil dari file Numbers asli dan disimpan di Drive privat.  
+⚠️ **GitHub menyimpan riwayat commit terpisah dari isi branch.** Mengganti semua file pada `main` tidak serta-merta menghapus commit lama secara permanen dari penyimpanan GitHub. Penghapusan permanen semua jejak commit perlu prosedur penggantian/recreate repository dari akun pemilik, dan bisa memutus integrasi Vercel.
 
 ---
 
 <div align="center">
 
-### ✨ Satu aplikasi. Semua tagihan. Setiap bulan. ✨
+### 💙 ⚡ 💧 ☎️ 🌐 🏫 📒 📆 ✅ 🖨️ 💾 ☁️ 🚀
 
-⚡💧☎️🌐🛒🧾💾☁️📊✅📆🗂️🚀
+### **Semua tagihan. Semua bulan. Satu aplikasi.**
 
-**Dibuat untuk mengurangi pekerjaan berulang, bukan menambah tab spreadsheet.** 💙
+**Built for one owner, powered by Google Drive.**
 
 </div>
