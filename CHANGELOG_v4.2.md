@@ -1,4 +1,4 @@
-# TagihanBulanan v4.2.0 📒💰
+# TagihanBulanan v4.2.1 📒💰
 
 ## Tampilan
 - ↔️ Seret header tabel untuk menukar posisi kolom di desktop.
@@ -18,7 +18,7 @@
 - Original Numbers memiliki September/Oktober 2026 masing-masing 31 tagihan, dengan jumlah nominal yang sama: Rp15.928.209.
 - 🔒 Migrasi sekali saja, jika seluruh baris Oktober masih identik dengan September, akan mempertahankan nominal/platform dan menghapus centang `Sudah` serta `Cetak` yang terbawa salinan, bukan mengubah September.
 - 📚 PostgreSQL menyimpan snapshot JSON lama sebelum koreksi pada `tracker_migration_audit.previous_state`.
-- ⚠️ Jika Oktober sudah diedit dan tidak lagi cocok, migrasi otomatis dilewati tanpa mengubah data.
+- ⚠️ Bila sebagian Oktober sudah diedit, migrasi tidak menimpa baris tersebut. Baris lain yang masih persis data impor asli dapat dikoreksi secara selektif. Audit dan cadangan keadaan sebelumnya disimpan secara atomik di PostgreSQL.
 - 🔍 Endpoint `/api/health` menyampaikan `october2026Migration`: `applied` atau `skipped`.
 
 ## Keamanan

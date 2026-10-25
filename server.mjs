@@ -2,7 +2,7 @@ import express from 'express';
 import pg from 'pg';
 import {readFile} from 'node:fs/promises';
 import {createDecipheriv} from 'node:crypto';
-import {resetCopiedOctober2026} from './lib/october-migration.js';
+import {resetCopiedOctober2026,resetUntouchedOctober2026} from './lib/october-migration.js';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -80,6 +80,29 @@ async function prepareDatabase(){
         }
       }
     }
+    // Follow-up: migrate unaffected rows individually, preserving any October edits.
+    // This safely handles real users who started editing before the initial migration.
+    const keyV2='2026-10-selective-sync-preserve-edits-v2';
+    const checkV2=await c.query('SELECT 1 FROM tracker_migration_audit WHERE migration_key=$1',[keyV2]);
+    if(!checkV2.rowCount){
+      const r=await c.query('SELECT revision,data FROM tracker_state WHERE id=1 FOR UPDATE');
+      if(r.rowCount){
+        const currentData=r.rows[0].data;
+        const originalSeed=decodeSeed(await readFile(path.join(ROOT,'seed','initial.enc')),process.env.INITIAL_SEED_KEY);
+        const migrated=resetUntouchedOctober2026(currentData,originalSeed);
+        if(migrated.state){
+          const newRevision=Number(r.rows[0].revision)+1;
+          migrated.state.revision=newRevision;
+          migrated.state.updatedAt=new Date().toISOString();
+          await c.query('INSERT INTO tracker_migration_audit(migration_key,status,details,previous_state) VALUES($1,$2,$3::jsonb,$4::jsonb)',[keyV2,migrated.status,JSON.stringify({rows:migrated.resetRows,preservedEditedRows:migrated.editedRows,paidReset:migrated.resetPaid,printedReset:migrated.resetPrinted}),JSON.stringify(currentData)]);
+          await c.query('UPDATE tracker_state SET revision=$1,data=$2::jsonb,updated_at=now() WHERE id=1',[newRevision,JSON.stringify(migrated.state)]);
+          console.log(`OCTOBER_2026_SELECTIVE_MIGRATION ${migrated.status} reset ${migrated.resetRows} rows, preserved ${migrated.editedRows} edited rows, cleared ${migrated.resetPaid} paid flags`);
+        }else{
+          await c.query('INSERT INTO tracker_migration_audit(migration_key,status,details) VALUES($1,$2,$3::jsonb)',[keyV2,'skipped',JSON.stringify({reason:migrated.reason,editedRows:migrated.editedRows??null})]);
+          console.warn('OCTOBER_2026_SELECTIVE_MIGRATION SKIPPED: '+migrated.reason);
+        }
+      }
+    }
     await c.query('COMMIT');
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
 }
@@ -91,7 +114,7 @@ app.get('/api/session',(_req,res)=>res.json({authenticated:true,configured:true}
 app.post('/api/login',(_req,res)=>res.json({ok:true}));
 app.post('/api/logout',(_req,res)=>res.json({ok:true}));
 app.get('/api/health',async(_req,res)=>{
-  try{if(!pool)throw new Error('database not configured');const r=await pool.query('SELECT revision FROM tracker_state WHERE id=1');const m=await pool.query('SELECT status,details FROM tracker_migration_audit WHERE migration_key=$1',['2026-10-copy-from-2026-09-reset-status-v1']);res.status(r.rowCount?200:503).json({service:'Tagihan Bulanan',storage:'Render PostgreSQL',storageReady:r.rowCount===1,authReady:true,loginRequired:false,revision:r.rows[0]?.revision??null,october2026Migration:m.rows[0]?.status??'pending',migrationRows:m.rows[0]?.details?.rows??null});}
+  try{if(!pool)throw new Error('database not configured');const r=await pool.query('SELECT revision FROM tracker_state WHERE id=1');const m=await pool.query('SELECT status,details FROM tracker_migration_audit WHERE migration_key=$1',['2026-10-selective-sync-preserve-edits-v2']);res.status(r.rowCount?200:503).json({service:'Tagihan Bulanan',storage:'Render PostgreSQL',storageReady:r.rowCount===1,authReady:true,loginRequired:false,revision:r.rows[0]?.revision??null,october2026Migration:m.rows[0]?.status??'pending',migrationRows:m.rows[0]?.details?.rows??null,preservedEditedOctoberRows:m.rows[0]?.details?.preservedEditedRows??null});}
   catch(e){res.status(503).json({service:'Tagihan Bulanan',storageReady:false,error:'Database unavailable'});}
 });
 app.get('/api/state',async(_req,res)=>{

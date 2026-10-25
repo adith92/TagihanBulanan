@@ -2,13 +2,13 @@
 
 <img src="docs/assets/tagihanbulanan-showcase.png" width="100%" alt="TagihanBulanan" />
 
-# 💙⚡ TagihanBulanan v4.2.0
+# 💙⚡ TagihanBulanan v4.2.1
 
 ### 📅📒 Catatan Bulanan • 🏫🏘️ Tagihan • 💰 Rupiah • 🛒 Pembayaran
 
 [🚀 **BUKA APLIKASI**](https://tagihanbulanan.onrender.com) · [📊 **PERUBAHAN V4.2**](CHANGELOG_v4.2.md) · [📚 **AUDIT IMPOR**](docs/IMPORT_REPORT.md)
 
-![Render](https://img.shields.io/badge/Hosting-Render-blueviolet) ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%2018-336791) ![Version](https://img.shields.io/badge/Version-4.2.0-22aa88)
+![Render](https://img.shields.io/badge/Hosting-Render-blueviolet) ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%2018-336791) ![Version](https://img.shields.io/badge/Version-4.2.1-22aa88)
 
 </div>
 
@@ -32,7 +32,7 @@
 
 ## 🧾 Oktober 2026
 
-Data dari spreadsheet asli menunjukkan September dan Oktober 2026 sama-sama 31 baris dengan total Rp15.928.209. Jika Oktober masih identik dengan September saat deployment, migrasi otomatis mengosongkan status Sudah/Cetak agar pembayaran bulan baru belum dianggap lunas, tanpa mengubah nominal atau riwayat September. Snapshot sebelum koreksi disimpan di database. Jika terdapat edit baru, migrasi dilewati agar tidak menimpa data yang sudah berubah.
+Data dari spreadsheet asli menunjukkan September dan Oktober 2026 sama-sama 31 baris dengan total Rp15.928.209. Jika Oktober masih identik dengan September saat deployment, migrasi otomatis mengosongkan status Sudah/Cetak agar pembayaran bulan baru belum dianggap lunas, tanpa mengubah nominal atau riwayat September. Snapshot sebelum koreksi disimpan di database. Jika sebagian Oktober sudah diedit, hanya baris yang masih identik dengan file Numbers asli yang direset; baris yang sudah diubah tetap utuh. Backup kondisi sebelum migrasi tersimpan di database.
 
 Status: [Render health](https://tagihanbulanan.onrender.com/api/health) · `october2026Migration`.
 
