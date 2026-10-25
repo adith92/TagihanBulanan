@@ -1,4 +1,4 @@
-# ⚡ TagihanBulanan v5.1.0
+# ⚡ TagihanBulanan v5.3.0
 
 **Production:** https://tagihanbulanan.onrender.com  
 **Stack:** Node.js 24 LTS, Express 5.3.0, PostgreSQL 18 with pg 8.23.1.  
@@ -55,3 +55,13 @@ Seluruh pengembangan dan dokumentasi *versi selanjutnya* disimpan di **GitHub sa
 ## v5.2: Copy nomor pelanggan dan kode bayar
 
 Ketuk nomor di kartu HP, tabel desktop, atau Master Tagihan untuk menyalin **nomor asli secara persis sebagai teks** (termasuk awalan nol). Ikon ⧉ Salin memanggil Clipboard API, dengan fallback untuk browser lama. Tidak mengubah data PostgreSQL dan tidak perlu mengetik ulang nomor pembayaran. Dapat langsung paste ke Blibli, Tokopedia atau aplikasi pembayaran lain.
+
+## v5.3 • Edit per baris dan nomor pelanggan
+
+- Setiap baris tagihan (HP maupun desktop) memiliki tombol ✏️ **Edit**.
+- Ubah nomor pelanggan/kode bayar sebagai **teks**, nama, kategori, nominal Rupiah, platform, catatan, serta status Sudah/Cetak.
+- Untuk baris berulang, opsi **Perbarui master untuk bulan berikutnya** dapat dicentang/dimatikan. Edit master tidak menyentuh riwayat pembayaran masa lalu.
+- Master Tagihan kini memiliki tombol ✏️ Edit untuk nomor pelanggan dan detail tagihan berulang.
+- Tombol ⧉ Salin nomor tetap ada. Validasi mencegah memasukkan duplikat identik (nomor + nama + kategori) di periode/master yang sama.
+- Simpan menggunakan transaksi PostgreSQL revision-safe. **Riwayat lama bukan data ganda yang boleh dihapus.**
+- Dokumentasi versi lama tetap tersimpan dalam riwayat Git untuk pemulihan, tetapi aplikasi dan database live tidak menambahkan duplikat saat deploy.

@@ -1,5 +1,5 @@
 // Privacy-first app shell: NEVER intercept or store /api state, session, or financial data.
-const CACHE_NAME='tagihanbulanan-shell-v5.2.0';
+const CACHE_NAME='tagihanbulanan-shell-v5.3.0';
 const ALLOWED=new Set(['/','/index.html','/style.css','/app.js','/model.js','/export.js','/site.webmanifest','/icons/icon-192.png','/icons/icon-512.png','/icons/icon-180.png']);
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting());});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith('tagihanbulanan-shell-')&&key!==CACHE_NAME)await caches.delete(key);await self.clients.claim();})());});
