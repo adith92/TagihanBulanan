@@ -1,138 +1,66 @@
 <div align="center">
 
-<img src="docs/assets/tagihanbulanan-showcase.png" width="100%" alt="TagihanBulanan: aplikasi pembukuan tagihan bulanan" />
+<img src="docs/assets/tagihanbulanan-showcase.png" width="100%" alt="TagihanBulanan" />
 
-# 💙⚡ TagihanBulanan
-### 🏫📒 Pembukuan Listrik · 💧 Air · ☎️ Telkom · 🌐 Internet
+# 💙⚡ TagihanBulanan v4.2.0
 
-**📅 Semua bulan · 💰 Rupiah · ✅ Status bayar · 🖨️ Bukti cetak · 🚀 Render · 🐘 PostgreSQL**
+### 📅📒 Catatan Bulanan • 🏫🏘️ Tagihan • 💰 Rupiah • 🛒 Pembayaran
 
-[🌍 **Buka aplikasi Render**](https://tagihanbulanan.onrender.com) · [🛠️ **Dashboard Render**](https://dashboard.render.com/web/srv-dbeqv45g1s2s73dgohtg) · [📚 **Laporan impor**](docs/IMPORT_REPORT.md) · [📖 **Panduan setup**](RENDER_SETUP.md)
+[🚀 **BUKA APLIKASI**](https://tagihanbulanan.onrender.com) · [📊 **PERUBAHAN V4.2**](CHANGELOG_v4.2.md) · [📚 **AUDIT IMPOR**](docs/IMPORT_REPORT.md)
 
-![Node.js](https://img.shields.io/badge/Node.js-22+-green?style=flat-square) ![Database](https://img.shields.io/badge/Database-PostgreSQL_18-336791?style=flat-square) ![Region](https://img.shields.io/badge/Region-Singapore-orange?style=flat-square) ![Status](https://img.shields.io/badge/Impor-Pending_DB_Connection-yellow?style=flat-square)
+![Render](https://img.shields.io/badge/Hosting-Render-blueviolet) ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%2018-336791) ![Version](https://img.shields.io/badge/Version-4.2.0-22aa88)
 
 </div>
 
-## 🖼️ Tampilan
+## ✨ Fitur Favorit
 
-<img src="docs/assets/tagihanbulanan-dashboard.png" alt="Konsep tampilan dashboard tagihan" width="100%" />
+| | Fitur | Cara memakai |
+|---|---|---|
+| ↔️ | Pindah kolom | Drag judul kolom ke posisi lain (desktop) |
+| 📐 | Atur lebar | Tarik sisi kanan header kolom |
+| 💰 | Currency IDR | Nilai otomatis tampil sebagai **Rp 1.000.000** |
+| ☁️ | Auto-save | Simpan ke Render PostgreSQL setelah selesai mengedit |
+| 🔁 | Sinkron ulang | Periksa pembaruan server saat tab aktif |
+| 🛒 | Blibli | [Buka pembayaran](https://www.blibli.com/digital/p/top-up-tagihan) |
+| 🛍️ | Tokopedia | [Buka pembayaran](https://www.tokopedia.com/top-up-tagihan) |
+| 📂 | Riwayat | **83 bulan, 2.440 tagihan, 71 master** diimpor dari Apple Numbers |
 
-<img src="docs/assets/tagihanbulanan-workflow.png" alt="Alur tagihan bulanan" width="100%" />
+<img src="docs/assets/tagihanbulanan-dashboard.png" width="100%" alt="Contoh tampilan dashboard" />
+<img src="docs/assets/tagihanbulanan-workflow.png" width="100%" alt="Alur pengelolaan tagihan" />
 
-> 🎨 Gambar adalah ilustrasi desain, **bukan** screenshot sistem live.
+> Gambar hanyalah ilustrasi konsep desain, bukan screenshot produksi.
 
-## 🧮 Apa yang sudah disiapkan dari Apple Numbers?
+## 🧾 Oktober 2026
 
-| 🧾 Data asli | Jumlah |
-|---|---:|
-| 📆 Bulan historis | **83** |
-| 💳 Baris tagihan | **2.440** |
-| 🧍 Master tagihan berulang | **71** |
-| 🗂️ Kategori | **6** |
-| 🗓️ Rentang waktu | **November 2019 sampai Oktober 2026** |
+Data dari spreadsheet asli menunjukkan September dan Oktober 2026 sama-sama 31 baris dengan total Rp15.928.209. Jika Oktober masih identik dengan September saat deployment, migrasi otomatis mengosongkan status Sudah/Cetak agar pembayaran bulan baru belum dianggap lunas, tanpa mengubah nominal atau riwayat September. Snapshot sebelum koreksi disimpan di database. Jika terdapat edit baru, migrasi dilewati agar tidak menimpa data yang sudah berubah.
 
-Data diekstrak dari **Tagihan Listrik Sekolahan.numbers** dan dijadikan *seed* AES-256-GCM yang aman disimpan di GitHub publik. **Tidak ada nama pelanggan atau angka tagihan dalam plaintext di repository.** File `.numbers` asli, JSON, CSV, dan Excel cadangan disimpan di Google Drive pribadi. Februari 2020 tidak ada tab di sumber aslinya.
+Status: [Render health](https://tagihanbulanan.onrender.com/api/health) · `october2026Migration`.
 
-⚠️ **Status aktual:** Web service dan PostgreSQL Render sudah dibuat, namun data historis belum terverifikasi masuk sampai `DATABASE_URL` diisi, startup impor sukses, dan angka query SQL diverifikasi. Bukan mode demo dan bukan Google Apps Script.
-
-## 🎁 Fitur utama
-
-| Ikon | Fitur | Keterangan |
-|:---:|---|---|
-| 📅🔁 | **Pengulangan bulanan** | Nominal pelanggan menyalin dari periode terakhir, status bayar/cetak kembali kosong |
-| ✅ | **Sudah** | Centang setelah tagihan dibayar |
-| 🖨️ | **Cetak** | Centang jika bukti sudah dicetak |
-| 🛒 | **Toko** | Platform pembayaran, misalnya Tokopedia, Shopee, DANA |
-| ➕➖ | **Baris** | Tambah sekali atau bulanan, sembunyikan per periode |
-| 🏷️ | **Kategori** | Tambah, ubah, arsip tanpa menghapus sejarah |
-| 💾 | **Save** | Menyimpan ke PostgreSQL, dengan kontrol versi transaksi |
-| 📊 | **Dashboard** | Rekap total, lunas, belum lunas, bukti belum dicetak |
-| 📜 | **Riwayat** | Setiap bulan menyimpan snapshot sendiri |
-| 📤 | **Ekspor** | Excel `.xlsx` / CSV yang dapat dibaca Apple Numbers |
-| 📱💻 | **Responsif** | PC dan HP |
-
-## 🐘 Arsitektur Render
+## 🐘 Arsitektur
 
 ```mermaid
 flowchart TD
-    A["📱💻 Browser"] --> B["🚀 Render Node / Express"]
-    B --> C[("🐘 Render PostgreSQL 18")]
-    D["🔐 Seed histori terenkripsi"] -->|"Impor sekali saat DB kosong"| B
-    C --> E["📆 83 periode / 2.440 baris"]
-    E --> A
-    F["☁️ Google Drive privat"] -.->|"Backup Numbers, JSON, Excel, CSV"| E
+ B[📱💻 Browser] --> API[⚡ Render Node + Express]
+ API <--> DB[(🐘 PostgreSQL 18)]
+ DB --> H[📚 83 periode historis]
+ B --> SAVE[💾 Auto-save + Save]
+ SAVE --> API
 ```
 
-**Tidak menggunakan Google Apps Script, Vercel Blob, maupun SQLite.** Data JSON asli disimpan dalam satu transaksi PostgreSQL dan tersedia melalui view SQL `bill_history`, `bill_period_totals`, `bill_categories`, dan `bill_templates`.
+- Data disimpan di database PostgreSQL, bukan di Google Apps Script, Vercel Blob, atau SQLite.
+- Kolom dan lebar tabel disimpan secara lokal di browser pada setiap perangkat.
+- Simpanan tagihan memakai revisi database; jika terjadi konflik, perubahan yang belum tersimpan tidak otomatis menimpa transaksi lain.
+- Kode backend ada di `server.mjs`, logika migrasi Oktober di `lib/october-migration.js`, dan UI di `public/`.
+- `npm install && npm start` untuk menjalankan. Server perlu variabel privat `DATABASE_URL` dan `INITIAL_SEED_KEY` saat impor awal.
 
-### 🔐 Impor aman, otomatis, dan idempoten
+## ⚠️ Privasi dan Masa Berlaku
 
-`seed/initial.enc` merupakan arsip terenkripsi. Saat startup pertama, `server.mjs` membuka seed hanya jika `INITIAL_SEED_KEY` valid serta koneksi `DATABASE_URL` tersedia. Impor hanya dilakukan jika tabel `tracker_state` masih kosong. Restart atau redeploy tidak menghapus transaksi yang telah diedit.
+Aplikasi tidak memakai login sesuai permintaan awal pemilik, sehingga **pengunjung yang memiliki URL dapat mengakses atau mengubah informasi tagihan**. Gunakan pengaman akses di depan aplikasi. Database Render Free ini akan berakhir pada **24 November 2026**. Tingkatkan paket atau cadangkan data sebelum berakhir. File Numbers asli dan backup terpisah tersimpan di Google Drive pribadi.
 
-**Status dan pemeriksaan:**
+## 📝 Dokumentasi
 
-```bash
-curl -s https://tagihanbulanan.onrender.com/api/health
-```
+- [CHANGELOG v4.2](CHANGELOG_v4.2.md)
+- [RENDER_SETUP](RENDER_SETUP.md)
+- [IMPORT_REPORT](docs/IMPORT_REPORT.md)
 
-Hasil yang diharapkan adalah `storageReady:true`. Verifikasi data lewat SQL:
-
-```sql
-SELECT COUNT(*) AS total_tagihan, COUNT(DISTINCT period) AS jumlah_periode FROM bill_history;
--- Harapan: 2440 tagihan, 83 periode
-```
-
-## ⚙️ Setup koneksi satu kali
-
-1. 🐘 Database PostgreSQL ada di [Render database](https://dashboard.render.com/d/dpg-dbequp9srm7s73d2g0eg-a).
-2. 🚀 Service Node.js ada di [Render web service](https://dashboard.render.com/web/srv-dbeqv45g1s2s73dgohtg).
-3. 🔗 Di web service → **Environment**, isi `DATABASE_URL` dengan **Internal Database URL** yang diperoleh di database → **Connect**. Jangan publikasikan URL itu karena berisi password database.
-4. 🔑 `INITIAL_SEED_KEY` disetel sebagai variabel privat Render (file referensinya disimpan terpisah di Google Drive pribadi).
-5. 🔄 Setelah konfigurasi tersimpan, Render otomatis memulai deploy. Buka `/api/health`, periksa impor SQL, lalu uji **edit → Save → refresh → nilai tetap tersimpan**.
-
-📚 Dokumentasi lengkap: [RENDER_SETUP.md](RENDER_SETUP.md)
-
-## 🔓 Tanpa halaman login, sesuai permintaan pengguna
-
-Aplikasi ini disiapkan tanpa form login. **Perhatian: jika situs dapat dibuka dari internet, siapa pun yang memiliki URL dapat membaca, menyalin, dan mengubah data tagihan pribadi.** Untuk keamanan, batasi akses melalui jaringan pribadi atau gerbang identitas yang mempertahankan sesi agar tidak harus login setiap kali. `noindex` bukan mekanisme keamanan.
-
-## 💸 Ketentuan paket Free
-
-- PostgreSQL Free Render memiliki masa aktif 30 hari dan tidak menyediakan backup otomatis bawaan.
-- Instance baru dibuat pada 25 Oktober 2026 dan dilaporkan kedaluwarsa **24 November 2026**.
-- Upgrade dan backup wajib dilakukan sebelum database digunakan jangka panjang.
-
-## 🧪 Jalankan lokal
-
-```bash
-npm install
-# Siapkan DATABASE_URL dan INITIAL_SEED_KEY dalam environment privat.
-npm start
-```
-
-## 🧭 Struktur proyek
-
-```text
-TagihanBulanan/
-├── 📜 README.md
-├── 🧠 server.mjs               # Express + PostgreSQL + importer awal
-├── 🧾 seed/initial.enc         # Encrypted, bukan data publik
-├── 🎨 public/                 # UI dan ekspor
-├── 📚 docs/                   # Spesifikasi, audit dan ilustrasi
-├── 🔧 RENDER_SETUP.md
-└── ⚙️ package.json
-```
-
-## 📋 Catatan rekonsiliasi
-
-Beberapa subtotal formula file asal tidak sama dengan penjumlahan seluruh sel angka (contohnya Oktober 2026). Aplikasi mengutamakan setiap baris dan menyertakan jejak `sourceSheet`, `sourceRow` untuk audit, tanpa diam-diam menghilangkan tagihan. Lihat [audit impor](docs/IMPORT_REPORT.md).
-
-<div align="center">
-
----
-
-### 💙⚡ Semua bulan, semua tagihan, satu aplikasi yang rapi.
-
-**🏫 📅 💰 ✅ 🖨️ 📦 🚀 🐘**
-
-</div>
+<div align="center">💙 📅 ✅ 💰 🖨️ 🛒 ☁️ 🐘 🚀</div>

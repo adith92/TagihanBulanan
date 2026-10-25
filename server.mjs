@@ -2,6 +2,7 @@ import express from 'express';
 import pg from 'pg';
 import {readFile} from 'node:fs/promises';
 import {createDecipheriv} from 'node:crypto';
+import {resetCopiedOctober2026} from './lib/october-migration.js';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -54,6 +55,31 @@ async function prepareDatabase(){
       await c.query('INSERT INTO tracker_state (id,revision,data,updated_at) VALUES (1,$1,$2::jsonb,now())',[Number(state.revision||1),JSON.stringify(state)]);
       console.log(`IMPORTED ${Object.keys(state.months).length} periods; ${Object.values(state.months).reduce((n,rows)=>n+rows.length,0)} monthly bills; ${state.templates.length} templates`);
     }else console.log('Database already initialized, historical import skipped safely');
+    // One-time October 2026 data correction. Preserve the complete previous state
+    // in PostgreSQL before changing anything; never run it twice.
+    await c.query(`CREATE TABLE IF NOT EXISTS tracker_migration_audit (
+      migration_key text PRIMARY KEY, status text NOT NULL, details jsonb NOT NULL,
+      previous_state jsonb, created_at timestamptz NOT NULL DEFAULT now())`);
+    const migrationKey='2026-10-copy-from-2026-09-reset-status-v1';
+    const done=await c.query('SELECT migration_key FROM tracker_migration_audit WHERE migration_key=$1',[migrationKey]);
+    if(!done.rowCount){
+      const existingState=await c.query('SELECT revision,data FROM tracker_state WHERE id=1 FOR UPDATE');
+      if(existingState.rowCount){
+        const before=existingState.rows[0].data;
+        const migrated=resetCopiedOctober2026(before);
+        if(migrated.status==='applied'){
+          const revision=Number(existingState.rows[0].revision)+1;
+          migrated.state.revision=revision;
+          migrated.state.updatedAt=new Date().toISOString();
+          await c.query('INSERT INTO tracker_migration_audit(migration_key,status,details,previous_state) VALUES ($1,$2,$3::jsonb,$4::jsonb)',[migrationKey,'applied',JSON.stringify({rows:migrated.rowCount,paidReset:migrated.priorPaid,printedReset:migrated.priorPrinted}),JSON.stringify(before)]);
+          await c.query('UPDATE tracker_state SET revision=$1,data=$2::jsonb,updated_at=now() WHERE id=1',[revision,JSON.stringify(migrated.state)]);
+          console.log(`OCTOBER_2026_MIGRATION APPLIED ${migrated.rowCount} rows; reset ${migrated.priorPaid} copied paid and ${migrated.priorPrinted} copied printed flags`);
+        }else{
+          await c.query('INSERT INTO tracker_migration_audit(migration_key,status,details) VALUES ($1,$2,$3::jsonb)',[migrationKey,'skipped',JSON.stringify({reason:migrated.reason})]);
+          console.warn('OCTOBER_2026_MIGRATION SKIPPED: '+migrated.reason);
+        }
+      }
+    }
     await c.query('COMMIT');
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
 }
@@ -65,7 +91,7 @@ app.get('/api/session',(_req,res)=>res.json({authenticated:true,configured:true}
 app.post('/api/login',(_req,res)=>res.json({ok:true}));
 app.post('/api/logout',(_req,res)=>res.json({ok:true}));
 app.get('/api/health',async(_req,res)=>{
-  try{if(!pool)throw new Error('database not configured');const r=await pool.query('SELECT revision FROM tracker_state WHERE id=1');res.status(r.rowCount?200:503).json({service:'Tagihan Bulanan',storage:'Render PostgreSQL',storageReady:r.rowCount===1,authReady:true,loginRequired:false,revision:r.rows[0]?.revision??null});}
+  try{if(!pool)throw new Error('database not configured');const r=await pool.query('SELECT revision FROM tracker_state WHERE id=1');const m=await pool.query('SELECT status,details FROM tracker_migration_audit WHERE migration_key=$1',['2026-10-copy-from-2026-09-reset-status-v1']);res.status(r.rowCount?200:503).json({service:'Tagihan Bulanan',storage:'Render PostgreSQL',storageReady:r.rowCount===1,authReady:true,loginRequired:false,revision:r.rows[0]?.revision??null,october2026Migration:m.rows[0]?.status??'pending',migrationRows:m.rows[0]?.details?.rows??null});}
   catch(e){res.status(503).json({service:'Tagihan Bulanan',storageReady:false,error:'Database unavailable'});}
 });
 app.get('/api/state',async(_req,res)=>{
