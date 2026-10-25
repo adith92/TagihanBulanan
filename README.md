@@ -1,4 +1,4 @@
-# ⚡ TagihanBulanan v5.0.0
+# ⚡ TagihanBulanan v5.1.0
 
 **Production:** https://tagihanbulanan.onrender.com  
 **Stack:** Node.js 24 LTS, Express 5.3.0, PostgreSQL 18 with pg 8.23.1.  
@@ -39,3 +39,15 @@ Branch aktif hanya memuat Node/Express dan PostgreSQL. Legacy Vercel API, Apps S
 Situs ini **tanpa login** sesuai permintaan sebelumnya. Siapa pun yang mengetahui URL bisa membaca dan mengubah data. Untuk data pelanggan, tambahkan gateway autentikasi privat; `X-Robots-Tag` bukan kontrol akses.
 
 [Lihat runbook Render](RENDER_SETUP.md) · [Panduan mobile v4.3](docs/RESPONSIVE_MOBILE_v4.3.md) · [Audit impor](docs/IMPORT_REPORT.md) · [Audit upgrade Context7](docs/UPGRADE_CONTEXT7_2026-10-25.md).
+
+## v5.1: Optimalisasi lintas perangkat
+
+- **Android dan iOS:** pencarian tagihan memperbarui daftar tanpa membongkar field pencarian. Keyboard virtual tidak lagi dibuat ulang setiap ketikan.
+- **Android/iOS saat berpindah aplikasi:** pemeriksaan server dilanjutkan ketika halaman aktif, perangkat kembali online, atau tab dibuka lagi. Draf belum tersimpan tidak pernah ditimpa oleh polling.
+- **Mac dan Windows:** font sistem asli menggantikan permintaan Google Fonts eksternal; startup lebih ringan dan tampilan lebih konsisten dengan OS.
+- **Tablet:** desain responsif dari v4.3 tetap menggunakan kartu di layar kecil dan tabel dengan kolom di desktop.
+- **Semua perangkat:** fokus keyboard lebih jelas, target sentuh disesuaikan, animasi menghormati pengaturan Reduce Motion, status database tetap ditampilkan.
+- **Zona waktu:** pemilihan periode awal ditentukan memakai `Asia/Jakarta` secara konsisten walau zona waktu perangkat berbeda.
+- **PWA:** versi cache asset `v5.1.0`. Seluruh request `/api/` serta data tagihan tidak dimasukkan ke cache offline.
+
+Seluruh pengembangan dan dokumentasi *versi selanjutnya* disimpan di **GitHub saja**. Jangan otomatis mengunggah file proyek ini ke Google Drive.
