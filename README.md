@@ -51,3 +51,7 @@ Situs ini **tanpa login** sesuai permintaan sebelumnya. Siapa pun yang mengetahu
 - **PWA:** versi cache asset `v5.1.0`. Seluruh request `/api/` serta data tagihan tidak dimasukkan ke cache offline.
 
 Seluruh pengembangan dan dokumentasi *versi selanjutnya* disimpan di **GitHub saja**. Jangan otomatis mengunggah file proyek ini ke Google Drive.
+
+## v5.2: Copy nomor pelanggan dan kode bayar
+
+Ketuk nomor di kartu HP, tabel desktop, atau Master Tagihan untuk menyalin **nomor asli secara persis sebagai teks** (termasuk awalan nol). Ikon ⧉ Salin memanggil Clipboard API, dengan fallback untuk browser lama. Tidak mengubah data PostgreSQL dan tidak perlu mengetik ulang nomor pembayaran. Dapat langsung paste ke Blibli, Tokopedia atau aplikasi pembayaran lain.
