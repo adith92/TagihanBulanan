@@ -1,9 +1,19 @@
 {
-  "name":"tagihanbulanan",
-  "version":"3.0.0",
-  "private":true,
-  "type":"module",
-  "engines":{"node":">=22"},
-  "scripts":{"dev":"node ./scripts/dev.mjs","test":"node --test","lint":"node --check public/app.js && node --check lib/model.js && node --check lib/auth.js && node --check lib/storage.js && node --check api/state.js && node --check api/login.js","build":"node scripts/build.mjs"},
-  "dependencies":{}
+  "name": "tagihanbulanan",
+  "version": "5.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "test": "node --test",
+    "lint": "node --check server.mjs && node --check public/app.js && node --check public/sw.js"
+  },
+  "dependencies": {
+    "express": "^5.3.0",
+    "pg": "^8.23.1"
+  }
 }

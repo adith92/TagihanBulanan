@@ -6,3 +6,6 @@ dist/
 .vercel/
 .DS_Store
 *.sqlite
+*.db
+*.log
+coverage/
