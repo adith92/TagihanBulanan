@@ -202,3 +202,42 @@ button,input,select,textarea{touch-action:manipulation}
 .master-table .copy-number{margin:0}
 @media(max-width:900px){.mobile-name-wrap .copy-number{min-height:44px;margin-top:6px;max-width:100%}}
 @media(max-width:390px){.copy-number{font-size:11px;gap:6px;padding-inline:8px}.copy-number-text b{font-size:12px}}
+
+/* v5.3: Dedicated row-edit actions and touch-safe modal for phones/tablets */
+.row-buttons,.mobile-row-actions,.master-actions{display:flex;align-items:center;gap:6px;justify-content:center}
+.mobile-row-actions{flex:0 0 auto;align-self:center}
+.master-actions{justify-content:flex-start;flex-wrap:wrap}
+.row-edit{display:inline-grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:10px;border:1px solid #c3d5fa;background:#eaf1ff;color:#244fbd;cursor:pointer;font-size:18px;touch-action:manipulation}
+.row-edit:hover{background:#dce8ff;border-color:#94b6f6}
+.row-edit:active{transform:scale(.97)}
+.bill-table .act-col{width:110px;min-width:110px;text-align:center}
+.bill-table .act-col .delete-btn{display:inline-grid;place-items:center;flex:0 0 42px;min-height:42px}
+.mobile-bill .mobile-row-actions .mobile-delete{margin:0;min-width:42px;min-height:42px}
+.edit-dialog{width:min(560px,calc(100vw - 28px));max-width:100%;max-height:min(90dvh,810px);border:1px solid #dae5f4;border-radius:17px;padding:0;background:#fff;color:var(--ink);box-shadow:0 22px 90px #0f24475e;overflow:auto;overscroll-behavior:contain}
+.edit-dialog::backdrop{background:#101f37a6;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.edit-dialog-header{padding:22px 23px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:1px solid var(--line)}
+.edit-dialog-header h2{margin:6px 0;font-size:21px}
+.edit-dialog-header .muted{font-size:12px;line-height:1.6}
+.edit-close{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:#f8faff;font-size:17px;color:#586c87}
+.edit-dialog-body{padding:17px 23px;display:grid;gap:13px}
+.edit-field{display:grid;gap:6px;min-width:0;font-size:12px;font-weight:700;color:#576d87}
+.edit-field .field{width:100%;min-width:0;font-size:16px;min-height:45px;line-height:1.4}
+.edit-field textarea.field{min-height:67px;resize:vertical}
+.edit-field small,.edit-master-choice small{font-weight:400;font-size:11px;color:#75849d;line-height:1.5}
+.edit-flags{display:flex;gap:12px;flex-wrap:wrap}
+.edit-flags label{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 12px;background:#f5f8fe;border:1px solid #e2e9f5;border-radius:9px;font-weight:700;font-size:12px}
+.edit-flags input,.edit-master-choice input{height:20px;width:20px;accent-color:var(--blue);flex-shrink:0}
+.edit-master-choice{display:flex;gap:12px;padding:14px;border:1px solid #d7e3f9;border-radius:11px;background:#f5f8ff;align-items:flex-start;font-size:12px;cursor:pointer}
+.edit-master-choice span{display:grid;gap:5px}
+.edit-error{padding:10px;border-radius:8px;background:#fff2f2;color:#af3838;border:1px solid #f4c9c9;font-size:12px}
+.edit-dialog-actions{display:flex;justify-content:flex-end;gap:9px;padding:14px 23px max(16px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fbfcff;position:sticky;bottom:0}
+.edit-dialog-actions .btn{min-height:44px}
+@media(max-width:680px){
+ .mobile-row-actions{gap:6px}
+ .edit-dialog{width:calc(100vw - 18px);max-height:calc(100dvh - 24px);border-radius:15px}
+ .edit-dialog-header{padding:16px}
+ .edit-dialog-body{padding:14px;gap:12px}
+ .edit-dialog-actions{padding:13px;gap:8px}
+ .edit-dialog-actions .btn{flex:1;min-width:0}
+ .mobile-bill .mobile-name-wrap{min-width:0}
+}

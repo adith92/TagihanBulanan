@@ -24,7 +24,7 @@ test('billing default uses Asia Jakarta and no external font dependency',async()
 test('financial API responses cannot be placed into service worker cache',async()=>{
   const sw=await load('public/sw.js');
   assert.match(sw,/url\.pathname\.startsWith\('\/api\/'\)/);
-  assert.match(sw,/tagihanbulanan-shell-v5\.2\.0/);
+  assert.match(sw,/tagihanbulanan-shell-v5\.3\.0/);
 });
 
 test('customer/payment numbers are copyable on desktop, mobile and master lists',async()=>{
@@ -37,4 +37,22 @@ test('customer/payment numbers are copyable on desktop, mobile and master lists'
   assert.match(app,/document\.execCommand\?\.\('copy'\)/);
   assert.match(app,/String\(record\?\.number\?\?''\)\.trim\(\)/);
   assert.match(style,/\.copy-number/);
+});
+
+test('per-row editor supports customer ID, monthly bill and recurring template',async()=>{
+ const html=await load('public/index.html'),app=await load('public/app.js'),css=await load('public/style.css');
+ assert.match(html,/id="editDialog"/);
+ assert.match(html,/id="editForm"/);
+ assert.match(html,/name="number" type="text"/);
+ assert.match(html,/name="updateMaster"/);
+ assert.match(app,/data-action="editRow"/);
+ assert.match(app,/data-action="editTemplate"/);
+ assert.match(app,/function openRecordEditor\(/);
+ assert.match(app,/function applyRecordEditor\(/);
+ assert.match(app,/Object\.assign\(tmpl,masterUpdates\)/);
+ assert.match(app,/function isDuplicateNumber\(/);
+ assert.match(app,/if\(isDuplicateNumber\(peers/);
+ assert.match(app,/if\(!busy\)void save\(false\)/);
+ assert.match(css,/\.edit-dialog/);
+ assert.match(css,/\.mobile-row-actions/);
 });
