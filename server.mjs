@@ -58,7 +58,7 @@ async function prepareDatabase(){
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
 }
 
-app.use((req,res,next)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');res.setHeader('Cache-Control','no-store');next();});
+app.use((req,res,next)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');res.setHeader('Cache-Control','no-store');res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');next();});
 // As explicitly requested: no password screen. Keep Origin check on mutations.
 function checkOrigin(req){const origin=req.get('origin');if(!origin)return false;try {return new URL(origin).host===req.get('host')||CORS_ORIGINS.includes(new URL(origin).origin);}catch{return false;}}
 app.get('/api/session',(_req,res)=>res.json({authenticated:true,configured:true}));
