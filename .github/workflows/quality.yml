@@ -1,0 +1,27 @@
+name: Quality checks
+on:
+  push:
+    branches: [main, render/postgres-v4]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  unit-and-syntax:
+    name: Node 24 / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+      - name: Syntax and lint
+        run: npm run lint
+      - name: Unit and source contracts
+        run: npm test
