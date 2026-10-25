@@ -10,7 +10,7 @@ test('Express 5 route uses supported named wildcard',async()=>{
 test('PWA service worker never intercepts /api/',async()=>{
  const sw=await txt('public/sw.js');
  assert.match(sw,/url\.pathname\.startsWith\('\/api\/'\)/);
- assert.match(sw,/tagihanbulanan-shell-v5\.0\.0/);
+ assert.match(sw,/tagihanbulanan-shell-v5\.1\.0/);
 });
 test('PWA manifest and recovery seed included',async()=>{
  for(const p of ['public/site.webmanifest','public/icons/icon-192.png','public/icons/icon-512.png','seed/initial.enc'])await access(new URL('../'+p,import.meta.url));
