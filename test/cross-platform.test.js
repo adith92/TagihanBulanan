@@ -33,7 +33,7 @@ test('customer/payment numbers are copyable on desktop, mobile and master lists'
   assert.match(app,/data-action="copyNumber"/);
   assert.match(app,/copyNumberControl\(r\)/);
   assert.match(app,/copyNumberControl\(t,'template'\)/);
-  assert.match(app,/navigator\.clipboard\?\.writeText\(number\)/);
+  assert.match(app,/navigator\.clipboard\.writeText\(number\)/);
   assert.match(app,/document\.execCommand\?\.\('copy'\)/);
   assert.match(app,/String\(record\?\.number\?\?''\)\.trim\(\)/);
   assert.match(style,/\.copy-number/);
