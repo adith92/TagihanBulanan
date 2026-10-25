@@ -1,3 +1,5 @@
+> ⚡ **Status Render v4:** Source & initial seed PostgreSQL sudah disiapkan untuk branch `render/postgres-v4`. Status deployment Render harus diverifikasi terpisah. Mode tanpa login akan memperlihatkan data kepada siapa pun yang membuka URL; dianjurkan perlindungan akses di depan aplikasi. [Detail setup](RENDER_SETUP.md).
+
 <div align="center">
 
 <img src="docs/assets/tagihanbulanan-showcase.png" width="100%" alt="Ilustrasi desain aplikasi tagihan bulanan untuk desktop dan HP" />
@@ -91,7 +93,7 @@ flowchart TB
 
 Proses setup satu kali oleh pemilik akun Google:
 
-1. 📂 Di Google Drive pribadi, temukan file privat **`tagihanbulanan-state.json`** yang sudah diimpor. Salin **file ID** dari link Drive (bukan seluruh link).
+1. 📂 Di Google Drive pribadi, temukan file privat **`tagihanbulanan-state-v3.json`** yang sudah diimpor. Salin **file ID** dari link Drive (bukan seluruh link).
 2. ⚙️ Buka [script.google.com](https://script.google.com) → **New project** → tempel seluruh isi [`apps-script/Code.gs`](apps-script/Code.gs). Beri nama `TagihanBulanan Drive Bridge`.
 3. 🔑 Pada **Project Settings → Script Properties**, tambahkan:
    - `DATA_FILE_ID` = ID file JSON dari langkah 1.

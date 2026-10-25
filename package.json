@@ -1,9 +1,6 @@
 {
-  "name":"tagihanbulanan",
-  "version":"3.0.0",
-  "private":true,
-  "type":"module",
+  "name":"tagihanbulanan","version":"4.0.0","private":true,"type":"module",
   "engines":{"node":">=22"},
-  "scripts":{"dev":"node ./scripts/dev.mjs","test":"node --test","lint":"node --check public/app.js && node --check lib/model.js && node --check lib/auth.js && node --check lib/storage.js && node --check api/state.js && node --check api/login.js","build":"node scripts/build.mjs"},
-  "dependencies":{}
+  "scripts":{"start":"node server.mjs","dev":"node server.mjs","test":"node --test","lint":"node --check server.mjs && node --check public/app.js","build":"node scripts/build.mjs"},
+  "dependencies":{"express":"^4.21.2","pg":"^8.16.3"}
 }
