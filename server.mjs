@@ -11,7 +11,7 @@ const app=express();
 app.disable('x-powered-by');
 app.use(express.json({limit:'5mb'}));
 const dbUrl=process.env.DATABASE_URL;
-const pool=dbUrl?new pg.Pool({connectionString:dbUrl,max:4,idleTimeoutMillis:12000,connectionTimeoutMillis:15000,ssl:process.env.DATABASE_SSL==='require'?{rejectUnauthorized:true}:undefined}):null;
+const pool=dbUrl?new pg.Pool({connectionString:dbUrl,max:4,idleTimeoutMillis:12000,connectionTimeoutMillis:15000,maxLifetimeSeconds:1800,ssl:process.env.DATABASE_SSL==='require'?{rejectUnauthorized:true}:undefined}):null;
 const CORS_ORIGINS=(process.env.EXTRA_ALLOWED_ORIGINS||'').split(',').map(x=>x.trim()).filter(Boolean);
 
 function validateState(state){
@@ -141,7 +141,11 @@ app.put('/api/state',async(req,res)=>{
   finally{client?.release();}
 });
 app.use(express.static(path.join(ROOT,'public'),{extensions:['html'],index:'index.html',maxAge:0}));
-app.get('*',(_req,res)=>res.sendFile(path.join(ROOT,'public','index.html')));
+// Express 5 requires named wildcards. Unknown API routes must not return HTML.
+app.get('/{*splat}',(req,res)=>{
+  if(req.path.startsWith('/api/'))return res.status(404).json({error:'Endpoint tidak tersedia'});
+  return res.sendFile(path.join(ROOT,'public','index.html'));
+});
 
 const PORT=Number(process.env.PORT)||10000;
 prepareDatabase().then(()=>app.listen(PORT,'0.0.0.0',()=>console.log(`TagihanBulanan on port ${PORT}`))).catch(e=>{console.error('DATABASE INITIALIZATION FAILED:',e.message);process.exit(1);});

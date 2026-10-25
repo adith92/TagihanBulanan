@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { blankState, generatePeriod, summary, validateState } from '../lib/model.js';
+import { blankState, generatePeriod, summary, validateState } from '../public/model.js';
 
 test('periode baru menyalin nominal dan mereset status', () => {
   const state=blankState();
