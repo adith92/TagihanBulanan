@@ -190,3 +190,15 @@ button,input,select,textarea{touch-action:manipulation}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+/* v5.2: One-tap payment/customer ID copy, accessible on Android/iOS and desktop */
+.copy-number{display:inline-flex;gap:8px;align-items:center;justify-content:flex-start;max-width:100%;min-height:42px;margin-top:5px;padding:7px 11px;border:1px solid #c8d9fb;border-radius:10px;background:#edf3ff;color:#234eab;font-size:12px;font-weight:700;text-align:left;cursor:pointer;vertical-align:middle;touch-action:manipulation;user-select:text;-webkit-user-select:text}
+.copy-number:hover{background:#e1ebff;border-color:#9bb8f6}
+.copy-number:active{background:#ccddff;transform:translateY(1px)}
+.copy-number-text{min-width:0;overflow-wrap:anywhere;word-break:break-word;font-variant-numeric:tabular-nums;letter-spacing:.15px}
+.copy-number-text b{color:#122f70;font-size:13px}
+.copy-number-icon{font-size:18px;flex-shrink:0;line-height:1}
+.copy-number-hint{font-size:11px;flex-shrink:0}
+.master-table .copy-number{margin:0}
+@media(max-width:900px){.mobile-name-wrap .copy-number{min-height:44px;margin-top:6px;max-width:100%}}
+@media(max-width:390px){.copy-number{font-size:11px;gap:6px;padding-inline:8px}.copy-number-text b{font-size:12px}}

@@ -24,5 +24,17 @@ test('billing default uses Asia Jakarta and no external font dependency',async()
 test('financial API responses cannot be placed into service worker cache',async()=>{
   const sw=await load('public/sw.js');
   assert.match(sw,/url\.pathname\.startsWith\('\/api\/'\)/);
-  assert.match(sw,/tagihanbulanan-shell-v5\.1\.0/);
+  assert.match(sw,/tagihanbulanan-shell-v5\.2\.0/);
+});
+
+test('customer/payment numbers are copyable on desktop, mobile and master lists',async()=>{
+  const app=await load('public/app.js'),style=await load('public/style.css');
+  assert.match(app,/function copyNumberControl\(/);
+  assert.match(app,/data-action="copyNumber"/);
+  assert.match(app,/copyNumberControl\(r\)/);
+  assert.match(app,/copyNumberControl\(t,'template'\)/);
+  assert.match(app,/navigator\.clipboard\?\.writeText\(number\)/);
+  assert.match(app,/document\.execCommand\?\.\('copy'\)/);
+  assert.match(app,/String\(record\?\.number\?\?''\)\.trim\(\)/);
+  assert.match(style,/\.copy-number/);
 });
