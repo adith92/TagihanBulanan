@@ -1,4 +1,4 @@
-# ⚡ TagihanBulanan v5.4.0
+# ⚡ TagihanBulanan v5.4.1
 
 **Production:** https://tagihanbulanan.onrender.com  
 **Stack:** Node.js 24 LTS, Express 5.3.0, PostgreSQL 18 with pg 8.23.1.  
@@ -71,3 +71,9 @@ Ketuk nomor di kartu HP, tabel desktop, atau Master Tagihan untuk menyalin **nom
 Paste `Rp3.179.571`, `**Rp3.179.571**`, `Rp 3.179.571,00`, atau `IDR 3,179,571` langsung ke kolom Tagihan atau formulir ✏️ Edit. Input segera diformat menjadi Rupiah, dan angka bulat `3179571` dipakai dalam total pembayaran dan auto-save PostgreSQL. Nilai tidak valid (termasuk dua nominal tergabung atau pecahan selain `,00`) ditolak. Riwayat periode lama dan migrasi database tidak disentuh.
 
 Default lebar kolom Tagihan menjadi 204px; pengguna tetap bebas memperbesar/menggeser kolom. Pengaturan lebar yang sebelumnya disimpan di browser tetap dihormati.
+
+## Oktober 2026: rekonsiliasi screenshot (v5.4.1)
+
+Screenshot pemilik menampilkan **24 baris aktif** dan total **Rp13.346.761**. Impor dari Numbers semula memasukkan 31 baris, termasuk 7 baris yang tidak terlihat dalam screenshot, dengan total Rp15.928.209. Ada selisih Rp2.581.448 dari satu baris tambahan. Koreksi sekali jalan menyembunyikan hanya tujuh baris yang identik dengan sumber impor, bukan menghapusnya, dan menonaktifkan template terkait yang belum dipakai lagi. Edit pengguna dilindungi; September dan bulan lain **tidak diubah**. Snapshot database sebelum koreksi disimpan di audit PostgreSQL agar bisa dipulihkan. Data asli tetap tersimpan, bukan diduplikasi. Status bayar/cetak yang mungkin sudah diedit tidak diubah.
+
+Detail pelanggan tidak dimasukkan ke repository publik; identifikasi menggunakan posisi baris sumber dan ID terverifikasi dari arsip impor terenkripsi.

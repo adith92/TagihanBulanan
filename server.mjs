@@ -2,7 +2,7 @@ import express from 'express';
 import pg from 'pg';
 import {readFile} from 'node:fs/promises';
 import {createDecipheriv} from 'node:crypto';
-import {resetCopiedOctober2026,resetUntouchedOctober2026} from './lib/october-migration.js';
+import {resetCopiedOctober2026,resetUntouchedOctober2026,alignOctoberWithScreenshot2026} from './lib/october-migration.js';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -103,6 +103,30 @@ async function prepareDatabase(){
         }
       }
     }
+    // Reconcile visible October rows with the owner's October 2026 screenshot.
+    // Existing September records remain untouched. The whole prior state is
+    // preserved in tracker_migration_audit, including user edits.
+    const screenshotKey='2026-10-screenshot-visible-rows-v3';
+    const screenshotDone=await c.query('SELECT 1 FROM tracker_migration_audit WHERE migration_key=$1',[screenshotKey]);
+    if(!screenshotDone.rowCount){
+      const previous=await c.query('SELECT revision,data FROM tracker_state WHERE id=1 FOR UPDATE');
+      if(previous.rowCount){
+        const originalSeed=decodeSeed(await readFile(path.join(ROOT,'seed','initial.enc')),process.env.INITIAL_SEED_KEY);
+        const originalState=previous.rows[0].data;
+        const correction=alignOctoberWithScreenshot2026(originalState,originalSeed);
+        const details={hiddenRows:correction.hiddenRows??0,previouslyHidden:correction.alreadyHidden??0,preservedEdited:correction.preservedEdited??0,missingRows:correction.missingRows??0,archivedTemplates:correction.archivedTemplates??0,visibleRows:correction.visibleRows??null,visibleTotal:correction.visibleTotal??null,septemberRows:correction.septemberRows??null,reason:correction.reason??null};
+        if(correction.changed){
+          const revision=Number(previous.rows[0].revision)+1;
+          correction.state.revision=revision;
+          correction.state.updatedAt=new Date().toISOString();
+          await c.query('INSERT INTO tracker_migration_audit(migration_key,status,details,previous_state) VALUES($1,$2,$3::jsonb,$4::jsonb)',[screenshotKey,correction.status,JSON.stringify(details),JSON.stringify(originalState)]);
+          await c.query('UPDATE tracker_state SET revision=$1,data=$2::jsonb,updated_at=now() WHERE id=1',[revision,JSON.stringify(correction.state)]);
+        }else{
+          await c.query('INSERT INTO tracker_migration_audit(migration_key,status,details) VALUES($1,$2,$3::jsonb)',[screenshotKey,correction.status,JSON.stringify(details)]);
+        }
+        console.log('OCTOBER_SCREENSHOT_RECONCILIATION '+JSON.stringify({status:correction.status,...details}));
+      }
+    }
     await c.query('COMMIT');
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
 }
@@ -114,7 +138,7 @@ app.get('/api/session',(_req,res)=>res.json({authenticated:true,configured:true}
 app.post('/api/login',(_req,res)=>res.json({ok:true}));
 app.post('/api/logout',(_req,res)=>res.json({ok:true}));
 app.get('/api/health',async(_req,res)=>{
-  try{if(!pool)throw new Error('database not configured');const r=await pool.query('SELECT revision FROM tracker_state WHERE id=1');const m=await pool.query('SELECT status,details FROM tracker_migration_audit WHERE migration_key=$1',['2026-10-selective-sync-preserve-edits-v2']);res.status(r.rowCount?200:503).json({service:'Tagihan Bulanan',storage:'Render PostgreSQL',storageReady:r.rowCount===1,authReady:true,loginRequired:false,revision:r.rows[0]?.revision??null,october2026Migration:m.rows[0]?.status??'pending',migrationRows:m.rows[0]?.details?.rows??null,preservedEditedOctoberRows:m.rows[0]?.details?.preservedEditedRows??null});}
+  try{if(!pool)throw new Error('database not configured');const r=await pool.query('SELECT revision FROM tracker_state WHERE id=1');const m=await pool.query('SELECT status,details FROM tracker_migration_audit WHERE migration_key=$1',['2026-10-selective-sync-preserve-edits-v2']);const screenshot=await pool.query('SELECT status,details FROM tracker_migration_audit WHERE migration_key=$1',['2026-10-screenshot-visible-rows-v3']);res.status(r.rowCount?200:503).json({service:'Tagihan Bulanan',storage:'Render PostgreSQL',storageReady:r.rowCount===1,authReady:true,loginRequired:false,revision:r.rows[0]?.revision??null,october2026Migration:m.rows[0]?.status??'pending',migrationRows:m.rows[0]?.details?.rows??null,preservedEditedOctoberRows:m.rows[0]?.details?.preservedEditedRows??null,octoberScreenshotReconciled:screenshot.rows[0]?.status??'pending',octoberVisibleRows:screenshot.rows[0]?.details?.visibleRows??null});}
   catch(e){res.status(503).json({service:'Tagihan Bulanan',storageReady:false,error:'Database unavailable'});}
 });
 app.get('/api/state',async(_req,res)=>{
