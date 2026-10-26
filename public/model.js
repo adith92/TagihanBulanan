@@ -6,6 +6,29 @@ export const periodKey = (year,month) => `${year}-${String(month).padStart(2,'0'
 export const validPeriod = ym => /^20\d\d-(0[1-9]|1[0-2])$/.test(ym);
 export const makeId = () => globalThis.crypto?.randomUUID?.() ?? `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 export function blankState() { return { schema: 2, revision: 0, categories: DEFAULT_CATEGORIES.map((name,i) => ({id:`cat-${i}`,name,order:i,active:true})), templates:[], months:{}, migrated:null, updatedAt:null }; }
+// Parse Rupiah pasted from websites, including markdown and Indonesian/Western grouping.
+// Returns integer IDR or null. Never silently combine two values or discard cents.
+export function parseIdrAmount(value){
+  if(typeof value==='number')return Number.isSafeInteger(value)&&value>=0&&value<=1e13?value:null;
+  let text=String(value??'').replace(/[\u00a0\u202f]/g,' ').trim();
+  text=text.replace(/^(?:\*{1,2}|_{1,2}|`)\s*/,'').replace(/\s*(?:\*{1,2}|_{1,2}|`)$/,'').trim();
+  text=text.replace(/^(?:Rp\.?|IDR)\s*/i,'').replace(/\s*,-$/,'').trim().replace(/\s/g,'');
+  if(!text||!/^[\d.,]+$/.test(text))return null;
+  if(/[.,]\d{2}$/.test(text)){
+    if(!/[.,]00$/.test(text))return null;
+    text=text.slice(0,-3);
+  }
+  if(!/^\d+$/.test(text)){
+    const separator=text.includes('.')?'.':',';
+    if(separator==='.'&&text.includes(',')||separator===','&&text.includes('.'))return null;
+    const groups=text.split(separator);
+    if(!/^\d{1,3}$/.test(groups[0])||groups.length<2||groups.slice(1).some(group=>!/^\d{3}$/.test(group)))return null;
+    text=groups.join('');
+  }
+  const amount=Number(text);
+  return Number.isSafeInteger(amount)&&amount>=0&&amount<=1e13?amount:null;
+}
+
 export const money = v => Number.isSafeInteger(Number(v)) && Number(v)>=0 ? Number(v) : 0;
 export const summary = rows => {
   const visible = rows.filter(r=>!r.hidden);

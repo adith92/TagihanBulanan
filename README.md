@@ -1,4 +1,4 @@
-# ⚡ TagihanBulanan v5.3.0
+# ⚡ TagihanBulanan v5.4.0
 
 **Production:** https://tagihanbulanan.onrender.com  
 **Stack:** Node.js 24 LTS, Express 5.3.0, PostgreSQL 18 with pg 8.23.1.  
@@ -65,3 +65,9 @@ Ketuk nomor di kartu HP, tabel desktop, atau Master Tagihan untuk menyalin **nom
 - Tombol ⧉ Salin nomor tetap ada. Validasi mencegah memasukkan duplikat identik (nomor + nama + kategori) di periode/master yang sama.
 - Simpan menggunakan transaksi PostgreSQL revision-safe. **Riwayat lama bukan data ganda yang boleh dihapus.**
 - Dokumentasi versi lama tetap tersimpan dalam riwayat Git untuk pemulihan, tetapi aplikasi dan database live tidak menambahkan duplikat saat deploy.
+
+## v5.4 • Tempel Rupiah langsung dari website
+
+Paste `Rp3.179.571`, `**Rp3.179.571**`, `Rp 3.179.571,00`, atau `IDR 3,179,571` langsung ke kolom Tagihan atau formulir ✏️ Edit. Input segera diformat menjadi Rupiah, dan angka bulat `3179571` dipakai dalam total pembayaran dan auto-save PostgreSQL. Nilai tidak valid (termasuk dua nominal tergabung atau pecahan selain `,00`) ditolak. Riwayat periode lama dan migrasi database tidak disentuh.
+
+Default lebar kolom Tagihan menjadi 204px; pengguna tetap bebas memperbesar/menggeser kolom. Pengaturan lebar yang sebelumnya disimpan di browser tetap dihormati.

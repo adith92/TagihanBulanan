@@ -24,7 +24,7 @@ test('billing default uses Asia Jakarta and no external font dependency',async()
 test('financial API responses cannot be placed into service worker cache',async()=>{
   const sw=await load('public/sw.js');
   assert.match(sw,/url\.pathname\.startsWith\('\/api\/'\)/);
-  assert.match(sw,/tagihanbulanan-shell-v5\.3\.0/);
+  assert.match(sw,/tagihanbulanan-shell-v5\.4\.0/);
 });
 
 test('customer/payment numbers are copyable on desktop, mobile and master lists',async()=>{
@@ -55,4 +55,15 @@ test('per-row editor supports customer ID, monthly bill and recurring template',
  assert.match(app,/if\(!busy\)void save\(false\)/);
  assert.match(css,/\.edit-dialog/);
  assert.match(css,/\.mobile-row-actions/);
+});
+
+test('pasted web currency updates totals without disrupting saved history',async()=>{
+ const app=await load('public/app.js'),model=await load('public/model.js');
+ assert.match(app,/document\.addEventListener\('paste',event=>/);
+ assert.match(app,/event\.clipboardData\?\.getData\('text\/plain'\)/);
+ assert.match(app,/input\.value=formatIdrInput\(amount\)/);
+ assert.match(app,/updateField\(input\)/);
+ assert.match(app,/f==='amount'\)\{render\(\)/);
+ assert.match(app,/const parseIdrInput=parseIdrAmount/);
+ assert.match(model,/export function parseIdrAmount\(/);
 });
