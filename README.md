@@ -1,4 +1,4 @@
-# ⚡ TagihanBulanan v5.4.1
+# ⚡ TagihanBulanan v5.4.2
 
 **Production:** https://tagihanbulanan.onrender.com  
 **Stack:** Node.js 24 LTS, Express 5.3.0, PostgreSQL 18 with pg 8.23.1.  
@@ -77,3 +77,7 @@ Default lebar kolom Tagihan menjadi 204px; pengguna tetap bebas memperbesar/meng
 Screenshot pemilik menampilkan **24 baris aktif** dan total **Rp13.346.761**. Impor dari Numbers semula memasukkan 31 baris, termasuk 7 baris yang tidak terlihat dalam screenshot, dengan total Rp15.928.209. Ada selisih Rp2.581.448 dari satu baris tambahan. Koreksi sekali jalan menyembunyikan hanya tujuh baris yang identik dengan sumber impor, bukan menghapusnya, dan menonaktifkan template terkait yang belum dipakai lagi. Edit pengguna dilindungi; September dan bulan lain **tidak diubah**. Snapshot database sebelum koreksi disimpan di audit PostgreSQL agar bisa dipulihkan. Data asli tetap tersimpan, bukan diduplikasi. Status bayar/cetak yang mungkin sudah diedit tidak diubah.
 
 Detail pelanggan tidak dimasukkan ke repository publik; identifikasi menggunakan posisi baris sumber dan ID terverifikasi dari arsip impor terenkripsi.
+
+## Screenshot Oktober final (v5.4.2)
+
+Setelah migrasi v5.4.1 terdeteksi satu baris sumber tidak tampil pada screenshot namun pernah diedit. Migrasi final **hanya menyembunyikan** baris itu, bukan menghapus atau mengubah nominal hasil edit. Setiap perubahan diarsipkan dalam `tracker_migration_audit.previous_state`. Tujuh entri sumber yang tidak tampil di screenshot kini tidak dihitung dalam tampilan Oktober. September tetap 31 catatan asli dan tidak diubah tanpa bukti screenshot September.

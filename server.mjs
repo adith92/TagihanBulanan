@@ -2,7 +2,7 @@ import express from 'express';
 import pg from 'pg';
 import {readFile} from 'node:fs/promises';
 import {createDecipheriv} from 'node:crypto';
-import {resetCopiedOctober2026,resetUntouchedOctober2026,alignOctoberWithScreenshot2026} from './lib/october-migration.js';
+import {resetCopiedOctober2026,resetUntouchedOctober2026,alignOctoberWithScreenshot2026,enforceOctoberScreenshotVisibility2026} from './lib/october-migration.js';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -125,6 +125,27 @@ async function prepareDatabase(){
           await c.query('INSERT INTO tracker_migration_audit(migration_key,status,details) VALUES($1,$2,$3::jsonb)',[screenshotKey,correction.status,JSON.stringify(details)]);
         }
         console.log('OCTOBER_SCREENSHOT_RECONCILIATION '+JSON.stringify({status:correction.status,...details}));
+      }
+    }
+    // Final owner screenshot alignment. Even if an imported row was edited,
+    // it is only hidden (not deleted); its content remains in SQL audit.
+    const finalKey='2026-10-screenshot-visible-rows-v4';
+    const finalDone=await c.query('SELECT 1 FROM tracker_migration_audit WHERE migration_key=$1',[finalKey]);
+    if(!finalDone.rowCount){
+      const previous=await c.query('SELECT revision,data FROM tracker_state WHERE id=1 FOR UPDATE');
+      if(previous.rowCount){
+        const seed=decodeSeed(await readFile(path.join(ROOT,'seed','initial.enc')),process.env.INITIAL_SEED_KEY);
+        const beforeState=previous.rows[0].data;
+        const corrected=enforceOctoberScreenshotVisibility2026(beforeState,seed);
+        const details={hiddenNow:corrected.hiddenNow??0,previouslyHidden:corrected.alreadyHidden??0,editedHidden:corrected.editedHidden??0,missing:corrected.missing??0,templatesArchived:corrected.templatesArchived??0,visibleRows:corrected.visibleRows??null,visibleTotal:corrected.visibleTotal??null,septemberRows:corrected.septemberRows??null,reason:corrected.reason??null};
+        if(corrected.changed){
+          const revision=Number(previous.rows[0].revision)+1;
+          corrected.state.revision=revision;
+          corrected.state.updatedAt=new Date().toISOString();
+          await c.query('INSERT INTO tracker_migration_audit(migration_key,status,details,previous_state) VALUES($1,$2,$3::jsonb,$4::jsonb)',[finalKey,corrected.status,JSON.stringify(details),JSON.stringify(beforeState)]);
+          await c.query('UPDATE tracker_state SET revision=$1,data=$2::jsonb,updated_at=now() WHERE id=1',[revision,JSON.stringify(corrected.state)]);
+        }else await c.query('INSERT INTO tracker_migration_audit(migration_key,status,details) VALUES($1,$2,$3::jsonb)',[finalKey,corrected.status,JSON.stringify(details)]);
+        console.log('OCTOBER_SCREENSHOT_FINAL '+JSON.stringify({status:corrected.status,...details}));
       }
     }
     await c.query('COMMIT');

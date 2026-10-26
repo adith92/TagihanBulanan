@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {alignOctoberWithScreenshot2026} from '../lib/october-migration.js';
+import {alignOctoberWithScreenshot2026,enforceOctoberScreenshotVisibility2026} from '../lib/october-migration.js';
 
 const excluded=new Set([5,7,10,19,28,29,31]);
 function setup(){
@@ -61,4 +61,27 @@ test('invalid source markers abort without mutation',()=>{
   const result=alignOctoberWithScreenshot2026(live,seed);
   assert.equal(result.status,'skipped');
   assert.equal(result.changed,false);
+});
+
+test('strict screenshot aligns all seven source IDs while retaining edited values',()=>{
+ const {seed,live}=setup();
+ live.months['2026-10'][4].amount=5056056;
+ const previous=structuredClone(live);
+ const correction=enforceOctoberScreenshotVisibility2026(live,seed);
+ assert.equal(correction.hiddenNow,7);
+ assert.equal(correction.editedHidden,1);
+ assert.equal(correction.visibleRows,24);
+ assert.equal(correction.visibleTotal,2400);
+ assert.equal(correction.state.months['2026-10'][4].amount,5056056);
+ assert.equal(correction.state.months['2026-10'][4].hidden,true);
+ assert.deepEqual(correction.state.months['2026-09'],previous.months['2026-09']);
+ assert.deepEqual(live,previous);
+});
+test('strict screenshot migration is safely idempotent',()=>{
+ const {seed,live}=setup();
+ const once=enforceOctoberScreenshotVisibility2026(live,seed);
+ const twice=enforceOctoberScreenshotVisibility2026(once.state,seed);
+ assert.equal(twice.changed,false);
+ assert.equal(twice.visibleRows,24);
+ assert.equal(twice.alreadyHidden,7);
 });
