@@ -1,0 +1,46 @@
+name: Encrypted TagihanBulanan database backup
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 19 * * *'
+permissions:
+  contents: write
+concurrency:
+  group: tagihan-data-backup
+  cancel-in-progress: false
+jobs:
+  backup:
+    if: github.event_name == 'workflow_dispatch' || vars.TAGIHAN_AUTO_BACKUP == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Export and encrypt the live database state
+        env:
+          TAGIHAN_BACKUP_KEY: ${{ secrets.TAGIHAN_BACKUP_KEY }}
+          TAGIHAN_API_URL: ${{ vars.TAGIHAN_API_URL }}
+        run: node scripts/encrypted-db-backup.mjs
+      - name: Store snapshot in separate GitHub branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git ls-remote --exit-code --heads origin data-backups >/dev/null; then
+            git fetch origin refs/heads/data-backups:refs/remotes/origin/data-backups
+            git switch -C data-backups origin/data-backups
+          else
+            git switch --orphan data-backups
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+          mkdir -p backups
+          cp "$RUNNER_TEMP/tagihan-backup.enc" backups/current.enc
+          cp "$RUNNER_TEMP/tagihan-backup-manifest.json" backups/manifest.json
+          git add backups/current.enc backups/manifest.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'backup: current encrypted TagihanBulanan state'
+            git push origin HEAD:refs/heads/data-backups
+          fi

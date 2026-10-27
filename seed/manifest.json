@@ -1,0 +1,21 @@
+{
+  "backup_version": "2026-10-27",
+  "type": "encrypted-normalized-original-apple-numbers",
+  "format": "TBSEED1: 7-byte header + 12-byte iv + 16-byte tag + AES-256-GCM(gzip(JSON))",
+  "source_date": "2026-10-25",
+  "live_postgres_snapshot": false,
+  "note": "Current Render database was deleted before this backup, so edits made on Render after import are not covered. Original archived state only.",
+  "periods": 83,
+  "rows": 2440,
+  "templates": 71,
+  "categories": 6,
+  "range": {
+    "min": "2019-11",
+    "max": "2026-10"
+  },
+  "original_state_revision": 1,
+  "original_state_updated_at": "2026-10-25T00:21:00+07:00",
+  "plaintext_compacted_sha256": "b8322bfb6072993133c7afc2707e0afb0925507d576869f896ae59d377dd12a4",
+  "encrypted_seed_sha256": "e1993034752185b164f6624eaea7be1fc1466ddfed22aec0684a7f87e1f94289",
+  "encrypted_seed_bytes": 64740
+}

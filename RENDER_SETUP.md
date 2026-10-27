@@ -1,27 +1,19 @@
-# Runbook Render · TagihanBulanan v5.0.0
+# Setup TagihanBulanan Render setelah penghapusan (27 Oktober 2026)
 
-Aplikasi dan PostgreSQL **sudah dibuat**, jadi jangan membuat service atau database baru.
+**Web dan database TagihanBulanan lama sudah tidak ditemukan di Render.** Tidak ada deployment baru yang dibuat. Proyek Render lain dalam workspace **jangan disentuh**.
 
-- Web: https://dashboard.render.com/web/srv-dbeqv45g1s2s73dgohtg
-- Database: https://dashboard.render.com/d/dpg-dbequp9srm7s73d2g0eg-a
-- Production URL: https://tagihanbulanan.onrender.com
-- Workspace GoldenBirdProject; Singapore; production branch `render/postgres-v4`.
-- Runtime Node 24 LTS; Build `npm install`; Start `npm start`.
-- Secret di Render (jangan commit): `DATABASE_URL` (internal PostgreSQL URL), `INITIAL_SEED_KEY` (arsip recovery).
-- Health: https://tagihanbulanan.onrender.com/api/health, periksa `storageReady:true`.
+- Source: https://github.com/adith92/TagihanBulanan
+- Data awal terenkripsi: `seed/initial.enc`, manifest di `seed/manifest.json`
+- Kunci pribadi: `INITIAL_SEED_KEY` ada pada file terpisah milik pemilik; **bukan di GitHub**.
+- Data pada GitHub adalah arsip Numbers tanggal 25 Oktober 2026 (83 periode, 2440 baris, 71 master), **bukan salinan terakhir PostgreSQL yang sudah dihapus**.
 
-## Keamanan dan migrasi
+Saat diminta deploy ulang:
+1. Buat database PostgreSQL Render baru dan web service Node 24 baru dari `main` atau `render/postgres-v4`.
+2. Build `npm install`, start `npm start`.
+3. Pasang `DATABASE_URL` (URL internal database BARU) dan `INITIAL_SEED_KEY` (kunci privat baru).
+4. Verifikasi `/api/health`, catatan jumlah baris dan migrasi Oktober dari screenshot, lalu Save/Reload sebelum menganggap backup terpulihkan.
+5. Jika diinginkan backup GitHub harian, aktifkan workflow `.github/workflows/encrypted-db-backup.yml` dengan GitHub Actions secret `TAGIHAN_BACKUP_KEY` dan vars `TAGIHAN_API_URL` serta `TAGIHAN_AUTO_BACKUP=true`.
 
-Data Numbers historis **sudah** ada di `tracker_state` dan tidak diimpor ulang bila tabel terisi. File `seed/initial.enc` hanya untuk pemulihan dan `lib/october-migration.js` melindungi data Oktober yang telah diedit. Jangan jalankan reset database.
+**Keamanan:** Repo GitHub bersifat publik. Jangan commit JSON pelanggan, password PostgreSQL, atau kunci AES secara mentah. Situs sebelumnya tanpa login; perbaiki keamanan sebelum produksi ulang.
 
-Database Free kedaluwarsa 24 November 2026 dan tidak memiliki backup bawaan. Upgrade dan siapkan backup aman sebelum akhir masa berlaku.
-
-Akses situs tanpa login berarti seluruh data dapat dibaca atau ditulis siapa pun dengan URL. Batasi melalui gateway privat sebelum membagikannya.
-
-## Checklist rilis
-
-1. Jalankan `npm test` dan `npm run lint`.
-2. Periksa Render deploy status `live`, startup tanpa kesalahan.
-3. Periksa `/api/health` memberikan respons siap database.
-4. Periksa tampilan PWA, Android, iPhone, tablet serta penulisan setelah login akses privat.
-5. Jangan uji edit data produksi sembarangan.
+[Lihat panduan restore](docs/RECOVERY_AFTER_RENDER_DELETE.md).
