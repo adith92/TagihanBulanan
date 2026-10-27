@@ -1,4 +1,4 @@
-# ⚡ TagihanBulanan v5.4.2
+# ⚡ TagihanBulanan v5.4.3
 
 **Status deployment:** Render web + PostgreSQL lama telah dihapus pada 27 Oktober 2026. Belum ada deployment TagihanBulanan baru.  
 **Stack:** Node.js 24 LTS, Express 5.3.0, PostgreSQL 18 with pg 8.23.1.  
@@ -86,3 +86,9 @@ Setelah migrasi v5.4.1 terdeteksi satu baris sumber tidak tampil pada screenshot
 ## Restore setelah penghapusan Render (27 Oktober 2026)
 
 Dokumentasi: [RECOVERY_AFTER_RENDER_DELETE.md](docs/RECOVERY_AFTER_RENDER_DELETE.md). Source + arsip terenkripsi hanya ada di GitHub; jangan unggah source/backup ke Google Drive. State terenkripsi asli telah diverifikasi roundtrip sebelum commit. Kunci pemulihan diserahkan ke pemilik secara terpisah agar tidak tersimpan di repository publik.
+
+## Akses privat Railway (v5.4.3)
+
+Seluruh rute web dan data `/api/state` memerlukan autentikasi HTTP Basic melalui `APP_ACCESS_USERNAME` dan `APP_ACCESS_PASSWORD` sebagai Railway environment secrets. Password wajib minimal 24 karakter; jika tidak dipasang, akses aplikasi ditolak (fail-closed). Hanya `GET /api/health` yang sengaja dapat diakses tanpa kredensial untuk health check Railway. Jangan simpan password di GitHub, tangkapan layar atau chat. Kredensial privat pengguna disimpan di Google Drive folder backup proyek.
+
+Catatan: GitHub repository visibility adalah pengaturan tersendiri melalui GitHub Settings, tidak otomatis diubah oleh autentikasi website. Mem-private-kan GitHub tidak memblokir URL Railway, dan sebaliknya.

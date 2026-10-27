@@ -1,7 +1,7 @@
 import express from 'express';
 import pg from 'pg';
 import {readFile} from 'node:fs/promises';
-import {createDecipheriv} from 'node:crypto';
+import {createDecipheriv,createHash,timingSafeEqual} from 'node:crypto';
 import {resetCopiedOctober2026,resetUntouchedOctober2026,alignOctoberWithScreenshot2026,enforceOctoberScreenshotVisibility2026} from './lib/october-migration.js';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -9,6 +9,35 @@ import {fileURLToPath} from 'node:url';
 const ROOT=path.dirname(fileURLToPath(import.meta.url));
 const app=express();
 app.disable('x-powered-by');
+// Privacy boundary: website and every /api/* route require an owner password.
+// Railway's /api/health is the sole unauthenticated endpoint, for platform probes.
+const privateUser=process.env.APP_ACCESS_USERNAME||'owner';
+const privatePassword=process.env.APP_ACCESS_PASSWORD;
+const constantTimeCompare=(left,right)=>{
+  const digest=value=>createHash('sha256').update(value,'utf8').digest();
+  return timingSafeEqual(digest(left),digest(right));
+};
+app.use((req,res,next)=>{
+  res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');
+  if(req.path==='/api/health')return next();
+  if(!privatePassword||privatePassword.length<24)return res.status(503).type('text/plain').send('Private access belum dikonfigurasi');
+  const header=req.get('authorization')||'';
+  let authorized=false;
+  if(header.startsWith('Basic ')){
+    try{
+      const raw=Buffer.from(header.slice(6),'base64').toString('utf8');
+      const colon=raw.indexOf(':');
+      if(colon>0){
+        const user=raw.slice(0,colon),pass=raw.slice(colon+1);
+        authorized=constantTimeCompare(user,privateUser)&&constantTimeCompare(pass,privatePassword);
+      }
+    }catch{}
+  }
+  if(authorized)return next();
+  res.setHeader('WWW-Authenticate','Basic realm="TagihanBulanan Private", charset="UTF-8"');
+  res.setHeader('Cache-Control','no-store');
+  return res.status(401).type('text/plain').send('Aplikasi privat: masukkan username dan password dari Google Drive pribadi');
+});
 app.use(express.json({limit:'5mb'}));
 const dbUrl=process.env.DATABASE_URL;
 const pool=dbUrl?new pg.Pool({connectionString:dbUrl,max:4,idleTimeoutMillis:12000,connectionTimeoutMillis:15000,maxLifetimeSeconds:1800,ssl:process.env.DATABASE_SSL==='require'?{rejectUnauthorized:true}:undefined}):null;
