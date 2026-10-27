@@ -1,15 +1,16 @@
 # ⚡ TagihanBulanan v5.4.2
 
-**Production:** https://tagihanbulanan.onrender.com  
+**Status deployment:** Render web + PostgreSQL lama telah dihapus pada 27 Oktober 2026. Belum ada deployment TagihanBulanan baru.  
 **Stack:** Node.js 24 LTS, Express 5.3.0, PostgreSQL 18 with pg 8.23.1.  
 **Client:** Responsive web/PWA for Android, iOS, iPad, tablets and desktop.
 
-## Data tetap aman
+## Cadangan data dan status pemulihan
 
-- Data asli diimpor dari `Tagihan Listrik Sekolahan.numbers`: 83 periode, 2.440 baris tagihan dan 71 master. Transaksi terbaru berada di PostgreSQL Render dan **tidak direset selama upgrade**.
-- `seed/initial.enc` adalah arsip pemulihan terenkripsi, digunakan hanya jika database baru kosong. Simpan bersama kunci privat yang ada di Render.
-- Rekonsiliasi Oktober 2026 diaudit di PostgreSQL; kode migrasi yang diperlukan tetap disimpan.
-- PostgreSQL Free kedaluwarsa 24 November 2026. Upgrade paket dan simpan backup eksternal sebelum tanggal tersebut.
+- Database Render lama telah **dihapus sebelum full live backup dapat diambil**. Jangan menganggap GitHub berisi transaksi live terbaru.
+- `seed/initial.enc` adalah salinan data normalisasi asli dari Apple Numbers (25 Oktober 2026), dienkripsi ulang AES-256-GCM pada 27 Oktober 2026: **83 bulan, 2440 tagihan, 71 master**.
+- Kunci pemulihan baru `INITIAL_SEED_KEY` **tidak ada di GitHub**. Pemilik harus menyimpan file kunci privat yang diberikan terpisah.
+- Perubahan yang hanya tersimpan di PostgreSQL lama setelah impor awal mungkin hilang. Lihat [panduan pemulihan](docs/RECOVERY_AFTER_RENDER_DELETE.md).
+- Workflow backup otomatis terenkripsi ke branch `data-backups` disiapkan, tetapi belum aktif karena aplikasi Render dihapus. Aktifkan setelah redeploy dan memasang Actions secret.
 
 ## Fitur
 
@@ -28,7 +29,7 @@ npm run lint
 npm start
 ```
 
-Render service sudah ada pada branch `render/postgres-v4`, dengan build `npm install`, start `npm start`, region Singapore. **Jangan buat ulang database.**
+Service dan DB Render sebelumnya **sudah dihapus**. Deployment ulang nantinya membutuhkan Render PostgreSQL baru, `DATABASE_URL` baru, dan `INITIAL_SEED_KEY` dari pemilik. **Jangan otomatis deploy sekarang.**
 
 ## Repo yang sudah dirapikan
 
@@ -81,3 +82,7 @@ Detail pelanggan tidak dimasukkan ke repository publik; identifikasi menggunakan
 ## Screenshot Oktober final (v5.4.2)
 
 Setelah migrasi v5.4.1 terdeteksi satu baris sumber tidak tampil pada screenshot namun pernah diedit. Migrasi final **hanya menyembunyikan** baris itu, bukan menghapus atau mengubah nominal hasil edit. Setiap perubahan diarsipkan dalam `tracker_migration_audit.previous_state`. Tujuh entri sumber yang tidak tampil di screenshot kini tidak dihitung dalam tampilan Oktober. September tetap 31 catatan asli dan tidak diubah tanpa bukti screenshot September.
+
+## Restore setelah penghapusan Render (27 Oktober 2026)
+
+Dokumentasi: [RECOVERY_AFTER_RENDER_DELETE.md](docs/RECOVERY_AFTER_RENDER_DELETE.md). Source + arsip terenkripsi hanya ada di GitHub; jangan unggah source/backup ke Google Drive. State terenkripsi asli telah diverifikasi roundtrip sebelum commit. Kunci pemulihan diserahkan ke pemilik secara terpisah agar tidak tersimpan di repository publik.
